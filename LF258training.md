@@ -35,7 +35,23 @@ Intoroduction Linux foundation
   1. watch over them when things fail and self-heal
   1. be able to perform rolling updates, rollbacks
   1. need a network setup which permits self-discovery of services in a very ephemeral environment
-
+- Other Solutions
+  - Docker Swarm
+    - Docker Solution. 
+    - It's embedded with the Docker Engine.
+  - Apache Mesos
+    - DataCenter scheduler. 
+    - it can run containers throuch the use of Marathon frameworks
+  - Nomad
+    - HashiCorp product. the makers of Vagrant and Consul.
+    - Managing Containerized application
+    - Nomad schedule task defined in Jobs
+    - It has Docker driver
+  - Rancher
+    - container orchestrator agnostic system
+    - it provides a sigle pane of glass interface, to managing application.
+    - it supports Mesos, Swarm, Kubernetes, Cattle(native system)
+    
 
 # Others
 Resource
