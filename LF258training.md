@@ -41,7 +41,9 @@ Intoroduction Linux foundation
         - It's embedded with the Docker Engine.
     - Apache Mesos
         - DataCenter scheduler. 
+        - it builds Multi-level shedurler
         - it can run containers throuch the use of Marathon frameworks
+        - it aims to better use a datacenter cluster.
     - Nomad
         - HashiCorp product. the makers of Vagrant and Consul.
         - Managing Containerized application
@@ -51,6 +53,36 @@ Intoroduction Linux foundation
         - container orchestrator agnostic system
         - it provides a sigle pane of glass interface, to managing application.
         - it supports Mesos, Swarm, Kubernetes, Cattle(native system)
+    - Kubenetes's distinguishing point is Heritage(History)
+- The Borg Heritage
+    - Kubernetes is inspired by Borg
+        - internal system used by Google
+    - Borg is operating over 15 years, world wide.
+    - Borg was a Google Secret for a long time.
+    - Borg was finally described publicly in 2015. 
+    - Borg Documentes: https://research.google.com/pubs/pub43438.html
+- Borg Lineage (they inspired by Borg)
+    - Borg
+        - Mesos
+        - Kubernetes
+        - Omega
+        - Cloud Foundry
+        - cgroups
+            - LXC
+            - Docker
+            - OCI
+                - rkt/appc
+    - cgroups
+        - Linux kernel,2007,Contributed by Google. It limits the resource used by collection of processes
+        - cgroups and Linux namespaces are at the heart of containres today, including Docker.
+    - Mesos
+        nspired by discussion with Google when Borg was still a secret.
+    - Cloud Foundry Foundation
+        - 12 factor application principles. great guidance to build web application
+            - it can scale easily
+            - it can be deployed in the cloud
+            - its build is automated
+        - Borg and Kubernetes address these principles as well
 
 # Others
 Resource
