@@ -119,11 +119,44 @@ Intoroduction Linux foundation
 - Cloud Native Computing Foundation
     - Google donate Kubernetes to a newly formed foundation within the Linux Foundation in July 2015, when K8s v1.0
     - CNCF members; cisco, Cloud Foundry Foundation, AT&T, Goldman Sachs, etc
+- K8s Documents
+    - Official Page: https://kubernetes.io/
+    - Github: https://github.com/kubernetes/kubernetes
+    - Paper: Google Borg(2015): https://research.google.com/pubs/pub43438.html
+    - Paper: Borg, Omega, and Kubernetes(2016): https://research.google.com/pubs/pub44843.html
+    - Podcast: Borg and Kubernetes with John Wilkes(2016): https://www.gcppodcast.com/post/episode-46-borg-and-k8s-with-john-wilkes/
+    - YouTube: Cluster Management at Google(2014):  https://www.youtube.com/watch?v=VQAAkO5B5Hg 
+    - CNCF page: https://www.cncf.io/
 
+
+# Q&A
+## Chapter 1
+- Q: On which of the following in K8s based on?
+    - A: Borg
+- Q: What language is K8s written in?
+    - A: Go
+- Q: whre is the cluster state stored?
+    - A: etcd
+## Chapter 2
+## Chapter 3
+## Chapter 4
+## Chapter 5
+## Chapter 6
+## Chapter 7
+## Chapter 8
+## Chapter 9
+## Chapter 10
+## Chapter 11
+## Chapter 12
+## Chapter 13
+## Chapter 14
+## Chapter 15
+## Chapter 16
 
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
 Discussion Board
 - https://www.linux.com/forums/lfs258-class-forum
+
 
