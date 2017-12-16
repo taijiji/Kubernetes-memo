@@ -128,16 +128,29 @@ Intoroduction Linux foundation
     - YouTube: Cluster Management at Google(2014):  https://www.youtube.com/watch?v=VQAAkO5B5Hg 
     - CNCF page: https://www.cncf.io/
 
+# Chapter3
+- Kubernetes Cluster
+    - Master node
+    - a set of Worker nodes
+- For testing process: Minikube
+    - these nodes can be run on the same node(Virtual or Physical).
+- Kubernets 6 compornents, it can run as starnderd Linux process or docker container.
+    - API server : on master node
+    - Scheduler : on master node
+    - Controller manager : on master node
+    - kubelet: on worker node
+    - proxy (aka kube proxy) : on worker node
+    - etcd cluster : on master node
 
 # Q&A
 ## Chapter 1
+## Chapter 2
 - Q: On which of the following in K8s based on?
     - A: Borg
 - Q: What language is K8s written in?
     - A: Go
 - Q: whre is the cluster state stored?
     - A: etcd
-## Chapter 2
 ## Chapter 3
 ## Chapter 4
 ## Chapter 5
