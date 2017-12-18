@@ -141,7 +141,21 @@ Intoroduction Linux foundation
     - kubelet: on worker node
     - proxy (aka kube proxy) : on worker node
     - etcd cluster : on master node
-
+- K8s Master nodes runs;
+    - API server
+        - REST interface to all the K8s resources
+        - it's highly configurable
+    - scheduler
+        - place to the containers on the node in the cluster.  according to various policies, metrics, resource requiremetns
+        - it's configurable via command line flags
+    - controller manager
+        - reconciling the actual state of cluster with the desired state, specified via the API.
+            - control loop that performs action based on the observed state of the cluster and the desired state.
+        - it's highly configurable
+    - the master node can be configured in a multi-master highly available
+        - setup: https://github.com/kelseyhightower/kubernetes-the-hard-way
+        - indeed, the shcedulers and contoller manages can elect a leader, while the API servers can be fronted by a load-balancer.
+        
 # Q&A
 ## Chapter 1
 ## Chapter 2
