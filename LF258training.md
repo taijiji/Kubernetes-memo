@@ -155,6 +155,23 @@ Intoroduction Linux foundation
     - the master node can be configured in a multi-master highly available
         - setup: https://github.com/kelseyhightower/kubernetes-the-hard-way
         - indeed, the shcedulers and contoller manages can elect a leader, while the API servers can be fronted by a load-balancer.
+- K8s worker nodes runs;
+    - kubelet
+        - interact with the underlyining docker engine
+        - installed on all worker nodes
+        - make sure that the containers that need to run are actually running.
+    - kube-proxy
+        - managing the network connectivity to the containers
+    - as well as docker engine
+- Keeping State with etcd
+    - K8s needs a persistency later,  to know the state fo the cluster over time.
+    - Traditionally, relational database may become a single point of failure
+    - K8s uses etcd.
+        - Distributed key-value stores, made to run on multiple nodes
+        - It can be run on a single node (it loses its distributed characteristic, and hence, it's tolerance to failure)
+        - etcd use a leader election algorithm
+        - to provide strong consistency of the stored state among the nodes.
+        - etcdctl
         
 # Q&A
 ## Chapter 1
