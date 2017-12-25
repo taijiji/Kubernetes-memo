@@ -172,6 +172,24 @@ Intoroduction Linux foundation
         - etcd use a leader election algorithm
         - to provide strong consistency of the stored state among the nodes.
         - etcdctl
+- Networking
+    - a pod is a group of co-localted containers the share the same IP address.
+    - the network needs to assing IP address to pods, and needs to provide traffic routes between all pods on any nodes
+    - Networking challenges
+        - Coupled container-to-container communications
+            - solved by the pod concept
+        - pod-to-pod communication
+        - external-to-pod communications
+            - solved by the services concept
+- Pod
+    - Pod represents a group fo co-locationed contaienrs with associated data volumes.
+    - The lowest compute unit in K8s is the Pod.
+    - all containers in a pod communicate over "localhost"
+    - Pod has a single IP address
+    - Containers in a pod, Container A and B and "pause conteiner" share the network namespace. 
+        - "pause container" is used to get an IPaddress, then all the containers will use its network namespace
+
+
         
 # Q&A
 ## Chapter 1
@@ -204,3 +222,5 @@ Discussion Board
 - https://www.linux.com/forums/lfs258-class-forum
 
 
+# TODO
+- suevery Network namespace
