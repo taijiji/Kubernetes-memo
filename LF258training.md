@@ -4,6 +4,9 @@ https://training.linuxfoundation.org/linux-courses/system-administration-trainin
 # mypage
 https://training.linuxfoundation.org/cas?destination=portal
 
+# Lab
+https://lms.quickstart.com/custom/858487/LFS258%20-%20Labs.pdf
+
 # Chapter1
 Intoroduction Linux foundation
 
@@ -182,6 +185,7 @@ Intoroduction Linux foundation
         - external-to-pod communications
             - solved by the services concept
 - Pod
+    - K8s call the "single IP-per-Pod Model" 
     - Pod represents a group fo co-locationed contaienrs with associated data volumes.
     - The lowest compute unit in K8s is the Pod.
     - all containers in a pod communicate over "localhost"
@@ -189,6 +193,67 @@ Intoroduction Linux foundation
     - Containers in a pod, Container A and B and "pause conteiner" share the network namespace. 
         - "pause container" is used to get an IPaddress, then all the containers will use its network namespace
 
+# Lab3: Docker networking
+
+```
+docker run -d --name=source busybox sleep 3600
+docker run -d --name=same-ip --net=container:source busybox sleep 3600
+```
+
+check the ip address of the each container
+
+```
+# Container 1
+docker exec -ti source ifconfig
+# container 2
+docker exec -ti same-ip ifconfig
+```
+
+## Start your K8s head node
+
+
+
+run etcd
+
+```
+docker run -d --name=k8s -p 8080:8080 gcr.io/google_containers/etcd:3.1.10 etcd --data-dir /var/lib/data
+```
+
+start the API server using "hyperkube"
+ (But it doesn't up container. Error?)
+
+```
+docker run -d --net=container:k8s gcr.io/google_containers/hyperkube:v1.7.6 /apiserver --etcd-servers=http://127.0.0.1:2379 --service-cluster-ip-range=10.0.0.1/24 --insecure-bind-address=0.0.0.0 --insecure-pord=8080 --admission-control=AlwaysAdmit
+
+
+docekr ps -a
+
+CONTAINER ID        IMAGE                                       COMMAND                  CREATED             STATUS                       PORTS                                                       NAMES
+33f968550713        gcr.io/google_containers/hyperkube:v1.7.6   "/apiserver --etcd..."   2 minutes ago       Exited (1) 2 minutes ago                                                                 youthful_almeida
+```
+
+Start the Admission contoroller
+
+```
+docker run -d --net=container:k8s gcr.io/google_containers/hyperkube:v1.7.6 /controller-manager --master=127.0.0.1:8080
+```
+
+To test that, use etcdctl in the etcd container
+
+```
+docker exec -ti k8s /bin/sh
+export ETCDCTL_API=3
+etcdctl get “/registry/api” --prefix=true
+```
+
+You can reach your Kubenetes API server and start exploring the API.
+ (But it doesn't return. Error?)
+
+```
+curl http://127.0.0.1:8080/api/v1
+
+curl: (52) Empty reply from server
+```
 
         
 # Q&A
