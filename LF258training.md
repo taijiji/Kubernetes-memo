@@ -192,6 +192,47 @@ Intoroduction Linux foundation
     - Pod has a single IP address
     - Containers in a pod, Container A and B and "pause conteiner" share the network namespace. 
         - "pause container" is used to get an IPaddress, then all the containers will use its network namespace
+_ CNI
+    - K8s is standardizing on "the Container Network Interface(CNI)" spectification.
+    - kubeadam(K8s cluster bootstrapping tool) use CNI as the default network interface mechanism.
+    - CNI doesn't not help you with pod-to-pod communication across nodes
+- Pod-to-Pod communication (Networking)
+    - the requirement from K8s
+         - All pods can communication eith eath other across nodes.
+         - All nodes can communicate with all popds.
+         - No "Network Address Translation(NAT)"
+    - All IPs involved(nodes and pods) are routable without NAT.
+    - Software defined overlay Solution
+        - Weave
+        - Flannel
+        - Calico
+        - Romana
+- kubectl : main command line cliant
+- Network Add-Ons
+    - example: networking using Weave net.
+        - "kubectl apply -f "https://cloud.weave.works/k8s/..."
+- Mesos Architecture
+    - No diffrerent from K8s, at high level.
+    - Persistence layer: Zookeeper (instead of etcd)
+    - head node / worker nodes
+- K8s command
+    - check status of each module on master node
+        - "systemctl list-units | grep kube"
+        - "systemctl list-units | grep etcd"
+        - "systemctl status kube-apiserver
+            - return "active(running)"
+        - "systemctl status kube-proxy
+    - configuration
+        - "vi /etc/systemd/system/kube-apiserver.service"
+        - "vi /etc/systemd/system/kube-proxy.service"
+    - check the inside-KVS
+        - "etcdctl ls"
+        - "etcdctl ls /registry"
+        - "etcdctl ls /registry/namespaces"
+        - "etcdctl ls /registry/pods/kube-system"
+    - check status of each module on worker node
+        - "docker ps"
+        - "systemctl list-units | grep kube"
 
 # Lab3: Docker networking
 
