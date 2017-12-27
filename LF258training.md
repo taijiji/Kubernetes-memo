@@ -196,6 +196,28 @@ _ CNI
     - K8s is standardizing on "the Container Network Interface(CNI)" spectification.
     - kubeadam(K8s cluster bootstrapping tool) use CNI as the default network interface mechanism.
     - CNI doesn't not help you with pod-to-pod communication across nodes
+    - https://github.com/containernetworking/cni
+
+```    
+$ cat >/etc/cni/net.d/10-mynet.conf <<EOF
+{
+	"cniVersion": "0.2.0",
+	"name": "mynet",
+	"type": "bridge",
+	"bridge": "cni0",
+	"isGateway": true,
+	"ipMasq": true,
+	"ipam": {
+		"type": "host-local",
+		"subnet": "10.22.0.0/16",
+		"routes": [
+			{ "dst": "0.0.0.0/0" }
+		]
+	}
+}
+EOF
+```
+
 - Pod-to-Pod communication (Networking)
     - the requirement from K8s
          - All pods can communication eith eath other across nodes.
@@ -210,7 +232,8 @@ _ CNI
 - kubectl : main command line cliant
 - Network Add-Ons
     - example: networking using Weave net.
-        - "kubectl apply -f "https://cloud.weave.works/k8s/..."
+        - "$ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')""
+        - https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
 - Mesos Architecture
     - No diffrerent from K8s, at high level.
     - Persistence layer: Zookeeper (instead of etcd)
@@ -233,6 +256,29 @@ _ CNI
     - check status of each module on worker node
         - "docker ps"
         - "systemctl list-units | grep kube"
+    - check Images name, status, version, networking
+        - "kubectl get nodes"
+        - "kubectl get pods --all-namespaces"
+    - configure networking plugin (CNI) (Demo)
+        - master node
+            - "systecmctl status kubelet"
+            - "more /etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+            - "cd /etc/kubernetes/manifests/"
+                - etcd.yaml
+                - kube-apiserver.yaml
+                - kube-contoller0manager.yaml
+                - kube-scheduler.yaml
+            - "kubectl apply -f ..."
+            - kubectl get nodes
+            - kubectl get pods --all-namespaces
+            - ifconfig
+        - worker node
+            - "systecmctl status kubelet"
+            - "more /etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+            - "more /etc/cni/net.d/weave.conf"
+            - "docker ps"
+                - k8s_weave-npc..
+
 
 # Lab3: Docker networking
 
