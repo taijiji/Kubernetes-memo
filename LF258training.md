@@ -280,6 +280,187 @@ EOF
                 - k8s_weave-npc..
 
 
+# Chapter4 K8s install and configuratin
+## Install kubectl
+
+```
+curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/darwin/amd64/kubectl
+```
+
+config file: /.kube/config
+- see cluster definitions (IP endopons)
+- see credentials
+- contexts
+
+switch between context
+
+```
+kubectl config use-context foobar
+```
+## Use GKE
+
+Install
+
+```
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
+gcloud init
+```
+
+create k8s cluster
+
+```
+gcloud container clusters create linuxfoundation
+
+Creating cluster linuxfoundation...done.
+Created [https://container.googleapis.com/v1/projects/k8s-training-190416/zones/us-west1-a/clusters/linuxfoundation].
+kubeconfig entry generated for linuxfoundation.
+NAME             LOCATION    MASTER_VERSION  MASTER_IP      MACHINE_TYPE   NODE_VERSION  NUM_NODES  STATUS
+linuxfoundation  us-west1-a  1.7.8-gke.0     35.203.149.93  n1-standard-1  1.7.8-gke.0   3          RUNNING
+```
+
+check cluster
+
+```
+gcloud container clusters list
+
+NAME             LOCATION    MASTER_VERSION  MASTER_IP      MACHINE_TYPE   NODE_VERSION  NUM_NODES  STATUS
+linuxfoundation  us-west1-a  1.7.8-gke.0     35.203.149.93  n1-standard-1  1.7.8-gke.0   3          RUNNING
+```
+
+check k8s node list
+
+```
+kubectl get nodes
+
+NAME                                             STATUS    ROLES     AGE       VERSION
+gke-linuxfoundation-default-pool-34a8474a-8szm   Ready     <none>    11m       v1.7.8-gke.0
+gke-linuxfoundation-default-pool-34a8474a-lk20   Ready     <none>    11m       v1.7.8-gke.0
+gke-linuxfoundation-default-pool-34a8474a-sk55   Ready     <none>    11m       v1.7.8-gke.0
+```
+
+delete cluster
+
+```
+gcloud container clusters delete linuxfoundation
+```
+
+# Using Minikube (local environmnet)
+
+install (MacOS)
+
+```
+brew cask install minikube
+```
+
+Start k8s.
+
+```
+minikube start
+```
+
+check k8s nodes
+
+```
+kubectl get nodes
+```
+
+# Minikube internals
+- Minikube is an open source project on github https://github.com/kubernetes/minikube#configuring-kubernetes
+- it runs a single "Go" binary called "localkube".
+- it start a VirtualBox VM that will contain a single nodes k8s deployment and docekr engine
+- Minikube VM also runs Docker, to be able to run containers
+    - k8s container on docker engine on Virtualbox
+
+connect minikube(virtual box)
+
+```
+minikube ssh
+```
+
+```
+docker ps
+
+CONTAINER ID        IMAGE                                                 COMMAND                  CREATED              STATUS              PORTS               NAMES
+7b1ef9c1f72b        gcr.io/google_containers/kubernetes-dashboard-amd64   "/dashboard --inse..."   21 seconds ago       Up 21 seconds                           k8s_kubernetes-dashboard_kubernetes-dashboard-hvr8b_kube-system_e112aabe-ebf3-11e7-a7f8-0800278459df_0
+5934570a8d43        gcr.io/k8s-minikube/storage-provisioner               "/storage-provisioner"   About a minute ago   Up About a minute                       k8s_storage-provisioner_storage-provisioner_kube-system_e0b5c968-ebf3-11e7-a7f8-0800278459df_0
+6e895b61950c        fed89e8b4248                                          "/sidecar --v=2 --..."   About a minute ago   Up About a minute                       k8s_sidecar_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+a7c09c35a8a6        459944ce8cc4                                          "/dnsmasq-nanny -v..."   About a minute ago   Up About a minute                       k8s_dnsmasq_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+2aa747d09357        512cd7425a73                                          "/kube-dns --domai..."   About a minute ago   Up About a minute                       k8s_kubedns_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+1195d46ba6c1        gcr.io/google_containers/pause-amd64:3.0              "/pause"                 About a minute ago   Up About a minute                       k8s_POD_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+4ab3164f900a        gcr.io/google_containers/pause-amd64:3.0              "/pause"                 About a minute ago   Up About a minute                       k8s_POD_kubernetes-dashboard-hvr8b_kube-system_e112aabe-ebf3-11e7-a7f8-0800278459df_0
+09fca79b2aee        gcr.io/google_containers/pause-amd64:3.0              "/pause"                 About a minute ago   Up About a minute                       k8s_POD_storage-provisioner_kube-system_e0b5c968-ebf3-11e7-a7f8-0800278459df_0
+6c04d444c578        0a951668696f                                          "/opt/kube-addons.sh"    About a minute ago   Up About a minute                       k8s_kube-addon-manager_kube-addon-manager-minikube_kube-system_7b19c3ba446df5355649563d32723e4f_0
+e3a281b3f484        gcr.io/google_containers/pause-amd64:3.0              "/pause"                 About a minute ago   Up About a minute                       k8s_POD_kube-addon-manager-minikube_kube-system_7b19c3ba446df5355649563d32723e4f_0
+```
+
+extract NAMES
+```
+$ docker ps --format "table {{.Names}}"
+
+NAMES
+k8s_kubernetes-dashboard_kubernetes-dashboard-hvr8b_kube-system_e112aabe-ebf3-11e7-a7f8-0800278459df_0
+k8s_storage-provisioner_storage-provisioner_kube-system_e0b5c968-ebf3-11e7-a7f8-0800278459df_0
+k8s_sidecar_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+k8s_dnsmasq_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+k8s_kubedns_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+k8s_POD_kube-dns-86f6f55dd5-tdz5s_kube-system_e12a8a1c-ebf3-11e7-a7f8-0800278459df_0
+k8s_POD_kubernetes-dashboard-hvr8b_kube-system_e112aabe-ebf3-11e7-a7f8-0800278459df_0
+k8s_POD_storage-provisioner_kube-system_e0b5c968-ebf3-11e7-a7f8-0800278459df_0
+k8s_kube-addon-manager_kube-addon-manager-minikube_kube-system_7b19c3ba446df5355649563d32723e4f_0
+k8s_POD_kube-addon-manager-minikube_kube-system_7b19c3ba446df5355649563d32723e4f_0
+```
+
+```
+$ ps -aux | grep localkube
+
+root      3594  9.2 18.0 11287024 370328 ?     Ssl  17:23   0:43 /usr/local/bin/localkube --dns-domain=cluster.local --node-ip=192.168.99.100 --generate-certs=false --logtostderr=true --enable-dns=false
+docker    5480  0.0  0.0   9120   472 pts/0    S+   17:31   0:00 grep localkube
+```
+
+```
+eval $(minikube docker-env)
+```
+
+# Minikube usage
+
+usage sample
+
+```
+minikube dashboard : open the dashboard
+minikube ip : get the IP address of your minikube VM.
+```
+
+
+```
+Usage:
+  minikube [command]
+
+Available Commands:
+  addons           Modify minikube's kubernetes addons
+  cache            Add or delete an image from the local cache.
+  completion       Outputs minikube shell completion for the given shell (bash or zsh)
+  config           Modify minikube config
+  dashboard        Opens/displays the kubernetes dashboard URL for your local cluster
+  delete           Deletes a local kubernetes cluster
+  docker-env       Sets up docker env variables; similar to '$(docker-machine env)'
+  get-k8s-versions Gets the list of Kubernetes versions available for minikube when using the localkube bootstrapper
+  ip               Retrieves the IP address of the running cluster
+  logs             Gets the logs of the running localkube instance, used for debugging minikube, not user code
+  mount            Mounts the specified directory into minikube
+  profile          Profile sets the current minikube profile
+  service          Gets the kubernetes URL(s) for the specified service in your local cluster
+  ssh              Log into or run a command on a machine with SSH; similar to 'docker-machine ssh'
+  ssh-key          Retrieve the ssh identity key path of the specified cluster
+  start            Starts a local kubernetes cluster
+  status           Gets the status of a local kubernetes cluster
+  stop             Stops a running local kubernetes cluster
+  update-check     Print current and latest version number
+  update-context   Verify the IP address of the running cluster in kubeconfig.
+  version          Print the version of minikube
+```
+
+
 # Lab3: Docker networking
 
 ```
@@ -342,7 +523,7 @@ curl http://127.0.0.1:8080/api/v1
 curl: (52) Empty reply from server
 ```
 
-        
+
 # Q&A
 ## Chapter 1
 ## Chapter 2
