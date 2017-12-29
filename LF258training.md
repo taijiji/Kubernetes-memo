@@ -345,7 +345,7 @@ delete cluster
 gcloud container clusters delete linuxfoundation
 ```
 
-# Using Minikube (local environmnet)
+## Using Minikube (local environmnet)
 
 install (MacOS)
 
@@ -365,7 +365,7 @@ check k8s nodes
 kubectl get nodes
 ```
 
-# Minikube internals
+## Minikube internals
 - Minikube is an open source project on github https://github.com/kubernetes/minikube#configuring-kubernetes
 - it runs a single "Go" binary called "localkube".
 - it start a VirtualBox VM that will contain a single nodes k8s deployment and docekr engine
@@ -422,7 +422,7 @@ docker    5480  0.0  0.0   9120   472 pts/0    S+   17:31   0:00 grep localkube
 eval $(minikube docker-env)
 ```
 
-# Minikube usage
+## Minikube usage
 
 usage sample
 
@@ -461,7 +461,7 @@ Available Commands:
 ```
 
 
-# Lab3: Docker networking
+## Lab3: Docker networking
 
 ```
 docker run -d --name=source busybox sleep 3600
@@ -521,7 +521,7 @@ curl http://127.0.0.1:8080/api/v1
 curl: (52) Empty reply from server
 ```
 
-# K8s application via Dashborad
+## K8s application via Dashborad
 Open Dashboad
 - http://192.168.99.100:30000/#!/overview?namespace=default
 
@@ -534,14 +534,14 @@ Start App
 - Workloads > Deployments > Deploy a Containerized App
 - redis
 
-# Install K8s with kubeadmin
+## Install K8s with kubeadmin
 
 1. "kubeadm init" on head nodes"
 2. "kubeadm join --token <token> <head node IP address>" on worker nodes
 3. "kubectl apply -f http:// ..."
     - use resource manifest of the network
 
-# other installation mechanism
+## other installation mechanism
 - kubespray
     - ansible playbook for k8s cluster
 - kops
@@ -556,7 +556,21 @@ Insltall K8s suing step by steo manual command
 - https://github.com/kelseyhightower/kubernetes-the-hard-way
 
 
+## Installation Collection
+Single node
+- Minikube
+- kube-solo
 
+# For deployment configuration
+- Single-node deployment
+    - all components run on the same server.
+- Single head node and multiple workers
+    - sigle node etcd instance running on the head node with, scheduler, API, controller manager
+- Multiple head nodes in asn HA configuration and multiple workers
+    -  API server will be fronted by a load balancer, scheduler and controller-manager will elect a leader
+    - congitured via flags
+- HA etcd cluster, with HA head nodes and mutiple workers
+    - 
 # Q&A
 ## Chapter 1
 ## Chapter 2
