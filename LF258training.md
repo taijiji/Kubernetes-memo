@@ -479,8 +479,6 @@ docker exec -ti same-ip ifconfig
 
 ## Start your K8s head node
 
-
-
 run etcd
 
 ```
@@ -522,6 +520,41 @@ curl http://127.0.0.1:8080/api/v1
 
 curl: (52) Empty reply from server
 ```
+
+# K8s application via Dashborad
+Open Dashboad
+- http://192.168.99.100:30000/#!/overview?namespace=default
+
+```
+minikube dashboard
+```
+
+Start App
+
+- Workloads > Deployments > Deploy a Containerized App
+- redis
+
+# Install K8s with kubeadmin
+
+1. "kubeadm init" on head nodes"
+2. "kubeadm join --token <token> <head node IP address>" on worker nodes
+3. "kubectl apply -f http:// ..."
+    - use resource manifest of the network
+
+# other installation mechanism
+- kubespray
+    - ansible playbook for k8s cluster
+- kops
+    - crate a k8s on AWS via CLI
+- kube-aws
+    - AWS cloud Formation to Provision K8s on AWS
+- kubicorn
+    - golong libray
+    - provision and manage k8s culuster
+
+Insltall K8s suing step by steo manual command
+- https://github.com/kelseyhightower/kubernetes-the-hard-way
+
 
 
 # Q&A
