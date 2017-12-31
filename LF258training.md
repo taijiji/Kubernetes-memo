@@ -561,7 +561,7 @@ Single node
 - Minikube
 - kube-solo
 
-# For deployment configuration
+## For deployment configuration
 - Single-node deployment
     - all components run on the same server.
 - Single head node and multiple workers
@@ -569,8 +569,64 @@ Single node
 - Multiple head nodes in asn HA configuration and multiple workers
     -  API server will be fronted by a load balancer, scheduler and controller-manager will elect a leader
     - congitured via flags
+    - etcd setp can be single-node
 - HA etcd cluster, with HA head nodes and mutiple workers
-    - 
+    - etcd would run as true cluster
+    - cluster provide HA and would run separate nodes than the K8s head nodes.
+
+## Running components via containers using Hyperkube
+- kubeadam can run the API server, scheduler, controller-manager as container
+- hyperkube: all-in-one binary of them, as container images
+    - gcr.io/google_containers/hyperkube:v1.7.6
+- installation 
+    - running kubelet as a system daemon
+
+```
+docker run --rm gcr.io/google_containers/hyperkube:v1.7.6 /hyperkube apiserver --help
+
+docker run --rm gcr.io/google_containers/hyperkube:v1.7.6 /hyperkube scheduler --help
+
+docker run --rm gcr.io/google_containers/hyperkube:v1.7.6 /hyperkube controller-manager --help
+```
+## Compiliing K8s from source
+
+build natively with Golang
+
+```
+cd $GOPATH/src/github.com
+git clone https://github.com/kubernetes/kubernetes
+cd kubenetes
+make
+```
+
+make quick-release
+ls -al _output/bin
+
+## Demo
+
+```
+which minikube
+which kubectl
+    - k8s client
+which gcloud
+```
+
+```
+kubectl logs xxx
+kubectl run ghost --images-ghost
+kubectl get pods
+kubectl get deploymentes
+kubectl config use-context minikube
+kubectl expose deployment/ghost --port=2368 --type=NodePort 
+kubectl get svc
+kubectl describe svc ghost
+minikube service ghost
+kubectl config view
+kubectl config use-context <contaier_id>
+kubectl config use-context minikube
+```
+
+
 # Q&A
 ## Chapter 1
 ## Chapter 2
