@@ -602,7 +602,7 @@ make
 make quick-release
 ls -al _output/bin
 
-## Demo
+## Minikube Demo
 
 ```
 which minikube
@@ -626,6 +626,23 @@ kubectl config use-context <contaier_id>
 kubectl config use-context minikube
 ```
 
+## Kubeadm demo
+create k8s on ubuntu on DegitalOcean
+
+https://kubernetes.io/docs/setup/independent/install-kubeadm/
+
+https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#14-installing-kubeadm-on-your-hosts
+
+kubectl get ndoes
+kubectl get ndoes --watch
+
+# Chapter5 Accessing k8s cluster using API
+
+
+
+
+## Lab4: Installtion using Minukube, kubeadm, manual
+https://lms.quickstart.com/custom/858487/Lab4.pdf
 
 # Q&A
 ## Chapter 1
@@ -660,3 +677,12 @@ Discussion Board
 
 # TODO
 - suevery Network namespace
+
+# Keywords
+## kubadm
+- a tool built to provide as best-practice "fast paths" for creating k8s cluster
+- networking
+
+## Hyperkube
+- hyperkube is an all-in-one binary for the Kubernetes server components
+- https://github.com/kubernetes/kubernetes/tree/master/cluster/images/hyperkube
