@@ -636,13 +636,194 @@ https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#14-installi
 kubectl get ndoes
 kubectl get ndoes --watch
 
-# Chapter5 Accessing k8s cluster using API
-
-
-
 
 ## Lab4: Installtion using Minukube, kubeadm, manual
 https://lms.quickstart.com/custom/858487/Lab4.pdf
+
+
+# Chapter5 Accessing k8s cluster using API
+
+## The API Endopoint
+make sure that Minikube is running
+
+```
+$ minikube status
+
+minikube: Running
+cluster: Running
+kubectl: Correctly Configured: pointing to minikube-vm at 192.168.99.100
+```
+
+run a local proxy to connect to the API server
+
+```
+$ kubectl proxy 
+
+Starting to serve on 127.0.0.1:8001
+```
+
+```
+$ curl http://localhost:8001
+
+{
+  "paths": [
+    "/api",
+    "/api/v1",
+    "/apis",
+    "/apis/",
+    "/apis/admissionregistration.k8s.io",
+    "/apis/admissionregistration.k8s.io/v1alpha1",
+    "/apis/apiextensions.k8s.io",
+    "/apis/apiextensions.k8s.io/v1beta1",
+    "/apis/apiregistration.k8s.io",
+    "/apis/apiregistration.k8s.io/v1beta1",
+    "/apis/apps",
+    "/apis/apps/v1beta1",
+    "/apis/apps/v1beta2",
+    "/apis/authentication.k8s.io",
+    "/apis/authentication.k8s.io/v1",
+    "/apis/authentication.k8s.io/v1beta1",
+    "/apis/authorization.k8s.io",
+    "/apis/authorization.k8s.io/v1",
+    "/apis/authorization.k8s.io/v1beta1",
+    "/apis/autoscaling",
+    "/apis/autoscaling/v1",
+    "/apis/autoscaling/v2beta1",
+    "/apis/batch",
+    "/apis/batch/v1",
+    "/apis/batch/v1beta1",
+    "/apis/batch/v2alpha1",
+    "/apis/certificates.k8s.io",
+    "/apis/certificates.k8s.io/v1beta1",
+    "/apis/extensions",
+    "/apis/extensions/v1beta1",
+    "/apis/networking.k8s.io",
+    "/apis/networking.k8s.io/v1",
+    "/apis/policy",
+    "/apis/policy/v1beta1",
+    "/apis/rbac.authorization.k8s.io",
+    "/apis/rbac.authorization.k8s.io/v1",
+    "/apis/rbac.authorization.k8s.io/v1alpha1",
+    "/apis/rbac.authorization.k8s.io/v1beta1",
+    "/apis/scheduling.k8s.io",
+    "/apis/scheduling.k8s.io/v1alpha1",
+    "/apis/settings.k8s.io",
+    "/apis/settings.k8s.io/v1alpha1",
+    "/apis/storage.k8s.io",
+    "/apis/storage.k8s.io/v1",
+    "/apis/storage.k8s.io/v1beta1",
+    "/healthz",
+    "/healthz/autoregister-completion",
+    "/healthz/etcd",
+    "/healthz/ping",
+    "/healthz/poststarthook/apiservice-openapi-controller",
+    "/healthz/poststarthook/apiservice-registration-controller",
+    "/healthz/poststarthook/apiservice-status-available-controller",
+    "/healthz/poststarthook/bootstrap-controller",
+    "/healthz/poststarthook/ca-registration",
+    "/healthz/poststarthook/generic-apiserver-start-informers",
+    "/healthz/poststarthook/kube-apiserver-autoregistration",
+    "/healthz/poststarthook/start-apiextensions-controllers",
+    "/healthz/poststarthook/start-apiextensions-informers",
+    "/healthz/poststarthook/start-kube-aggregator-informers",
+    "/healthz/poststarthook/start-kube-apiserver-informers",
+    "/logs",
+    "/metrics",
+    "/swagger-2.0.0.json",
+    "/swagger-2.0.0.pb-v1",
+    "/swagger-2.0.0.pb-v1.gz",
+    "/swagger.json",
+    "/swaggerapi",
+    "/ui",
+    "/ui/",
+    "/version"
+  ]
+}
+```
+
+## API Resources
+
+find a pod.
+API group a resource ia in specifies the apiVersion
+
+```
+$ curl http://localhost:8001/api/v1
+{
+    (snip)
+
+    {
+      "name": "pods",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "Pod",
+      "verbs": [
+        "create",
+        "delete",
+        "deletecollection",
+        "get",
+        "list",
+        "patch",
+        "proxy",
+        "update",
+        "watch"
+      ],
+      "shortNames": [
+        "po"
+      ],
+      "categories": [
+        "all"
+      ]
+    }
+
+    (snip)
+  ]
+}%
+```
+
+Typically a resource manifests(available in JSON or YAML formats) will basic skeleton.
+- kind:
+- apiVersion:
+- metadata:
+- spec:
+
+API Conventions
+- https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md
+
+
+## Your First Pod
+
+an expample of a pod manifest in YAML format.
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+    name: busybox
+    namespace: default
+spec:
+    containers:
+    - name: busybox
+      image: busybox
+      command:
+        - sleep
+        - "3600"
+```
+
+create this pod in K8s from YAML format.
+ 
+```
+$ kubectl create -f sample_pod.yaml
+
+pod "busybox" created
+```
+
+```
+kubectl get pods
+NAME                     READY     STATUS    RESTARTS   AGE
+busybox                  1/1       Running   0          29s
+```
+
+
 
 # Q&A
 ## Chapter 1
