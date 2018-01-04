@@ -823,7 +823,124 @@ NAME                     READY     STATUS    RESTARTS   AGE
 busybox                  1/1       Running   0          29s
 ```
 
+## Managing Resource with REST
+REST = managed via HTTP calls
+- GET
+- POST
+- PATCH
+- DELETE
+- etc
 
+TO discovery the API
+
+```
+kubectl --v=99 get pods busybox
+
+(snip)
+
+I0104 07:53:27.135814   63287 round_trippers.go:417] curl -k -v -XGET  -H "Accept: application/json" -H "User-Agent: kubectl/v1.8.1 (darwin/amd64) kubernetes/f38e43b" https://192.168.99.100:8443/api/v1/namespaces/default/pods/busybox
+I0104 07:53:27.147042   63287 round_trippers.go:436] GET https://192.168.99.100:8443/api/v1/namespaces/default/pods/busybox 200 OK in 11 milliseconds
+```
+
+If you delete this pod, HTTP method changes from GET to DELETE
+
+URI : /api/v1/namespaces/default/pods/busybox
+
+```
+kubectl --v=99 delete pods busybox
+
+(snip)
+
+I0104 07:59:04.029377   63336 round_trippers.go:417] curl -k -v -XDELETE  -H "Accept: application/json, */*" -H "User-Agent: kubectl/v1.8.1 (darwin/amd64) kubernetes/f38e43b" https://192.168.99.100:8443/api/v1/namespaces/default/pods/busybox
+I0104 07:59:04.032576   63336 round_trippers.go:436] DELETE https://192.168.99.100:8443/api/v1/namespaces/default/pods/busybox 200 OK in 3 milliseconds
+```
+
+## Namespaces
+
+Every Request is namespaced
+- ex) GET https://192.168.99.100:84443/api/v1/namespaces/default/pods
+
+
+```
+kubectl get ns
+
+NAME          STATUS    AGE
+default       Active    6d
+kube-public   Active    6d
+kube-system   Active    6d
+```
+
+```
+kubectl create ns linuxcon
+
+namespace "linuxcon" created
+```
+
+```
+kubectl get ns/linuxcon
+
+NAME       STATUS    AGE
+linuxcon   Active    53s
+```
+
+```
+kubectl get ns/linuxcon -o yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: 2018-01-04T16:07:19Z
+  name: linuxcon
+  resourceVersion: "190082"
+  selfLink: /api/v1/namespaces/linuxcon
+  uid: 5773f71a-f169-11e7-a7f8-0800278459df
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
+```
+
+```
+kubectl get ns/linuxcon -o json
+
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "creationTimestamp": "2018-01-04T16:07:19Z",
+        "name": "linuxcon",
+        "resourceVersion": "190082",
+        "selfLink": "/api/v1/namespaces/linuxcon",
+        "uid": "5773f71a-f169-11e7-a7f8-0800278459df"
+    },
+    "spec": {
+        "finalizers": [
+            "kubernetes"
+        ]
+    },
+    "status": {
+        "phase": "Active"
+    }
+}
+```
+
+```
+kubectl delete ns/linuxcon
+
+namespace "linuxcon" delete
+```
+
+sample: create a pod in the linuxcon namespace:
+
+```
+piVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  namespace: linuxcon
+...
+```
 
 # Q&A
 ## Chapter 1
