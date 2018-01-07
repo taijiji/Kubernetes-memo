@@ -1190,29 +1190,185 @@ root@redis-7f5f77dc44-qmx56:/data# redis-cli
 127.0.0.1:6379>
 ```
 
-# Q&A
-## Chapter 1
-## Chapter 2
-- Q: On which of the following in K8s based on?
-    - A: Borg
-- Q: What language is K8s written in?
-    - A: Go
-- Q: whre is the cluster state stored?
-    - A: etcd
-## Chapter 3
-## Chapter 4
-## Chapter 5
-## Chapter 6
-## Chapter 7
-## Chapter 8
-## Chapter 9
-## Chapter 10
-## Chapter 11
-## Chapter 12
-## Chapter 13
-## Chapter 14
-## Chapter 15
-## Chapter 16
+## Connecting to a Pod with Port Forwarding (Not exec)
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+redis-7f5f77dc44-qmx56   1/1       Running   0          9d
+```
+
+```
+kubectl port-forward redis-7f5f77dc44-qmx56 6379:6379
+
+Forwarding from 127.0.0.1:6379 -> 6379
+```
+
+## API demo
+
+check API 
+
+```
+minikube ssh
+```
+
+```
+curl localhost:8080
+curl localhost:8080/version
+curl localhost:8080/api/v1
+```
+
+```
+exit
+```
+
+namespace
+
+```
+kubectl get ns
+
+NAME          STATUS    AGE
+default       Active    10d
+kube-public   Active    10d
+kube-system   Active    10d
+```
+
+```
+ kubectl get pods --all-namespaces
+
+
+NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE
+default       redis-7f5f77dc44-qmx56        1/1       Running   0          9d
+kube-system   kube-addon-manager-minikube   1/1       Running   0          10d
+kube-system   kube-dns-86f6f55dd5-tdz5s     3/3       Running   0          10d
+kube-system   kubernetes-dashboard-hvr8b    1/1       Running   0          10d
+kube-system   storage-provisioner           1/1       Running   0          10d
+```
+
+create namespace
+
+```
+kubectl create ns foobar
+
+namespace "foobar" created
+```
+
+```
+kubectl get ns
+
+NAME          STATUS    AGE
+default       Active    10d
+foobar        Active    2m
+kube-public   Active    10d
+kube-system   Active    10d
+```
+
+create namespace from yaml file
+
+```
+vi ns.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lfs258
+```
+
+```
+kubectl create -f ns.yaml
+
+namespace "lfs258" created
+```
+
+```
+kubectl get ns
+
+NAME          STATUS    AGE
+default       Active    10d
+foobar        Active    6m
+kube-public   Active    10d
+kube-system   Active    10d
+lfs258        Active    2m
+```
+
+## LAb5
+https://lms.quickstart.com/custom/858487/Lab5.pdf
+
+
+create pod in a namespace
+
+```
+vi redis-lfs258.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: lfs258
+  name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis
+```
+
+```
+kubectl create -f redis-lfs258.yaml
+
+pod "redis" created
+```
+
+```
+kubectl get pods --namespace=lfs258
+
+NAME      READY     STATUS    RESTARTS   AGE
+redis     1/1       Running   0          5m
+```
+
+```
+kubectl get pods --all-namespaces
+NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE
+default       redis-7f5f77dc44-qmx56        1/1       Running   0          9d
+kube-system   kube-addon-manager-minikube   1/1       Running   0          10d
+kube-system   kube-dns-86f6f55dd5-tdz5s     3/3       Running   0          10d
+kube-system   kubernetes-dashboard-hvr8b    1/1       Running   0          10d
+kube-system   storage-provisioner           1/1       Running   0          10d
+lfs258        redis                         1/1       Running   0          5m
+```
+
+log
+
+```
+kubectl logs redis --namespace=lfs258
+1:C 07 Jan 20:04:26.215 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 07 Jan 20:04:26.215 # Redis version=4.0.6, bits=64, commit=00000000, modified=0, pid=1, just started
+1:C 07 Jan 20:04:26.215 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+1:M 07 Jan 20:04:26.216 * Running mode=standalone, port=6379.
+1:M 07 Jan 20:04:26.217 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+1:M 07 Jan 20:04:26.217 # Server initialized
+1:M 07 Jan 20:04:26.217 * Ready to accept connections
+```
+
+delete namespace, pods
+
+```
+kubectl delete pods redis
+
+pod "redis" deleted
+```
+
+```
+kubectl delete pods redis --namespace=lfs258
+
+pod "redis" deleted
+```
+
+```
+kubectl delete ns lfs258
+
+namespace "lfs258" deleted
+```
+
 
 # Others
 Resource
