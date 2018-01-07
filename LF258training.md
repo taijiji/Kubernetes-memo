@@ -942,6 +942,254 @@ metadata:
 ...
 ```
 
+## Check API Resource with kubectl
+
+- kubectl get pods
+- kubectl get namespaces
+- kubectl get replicasets
+- kubectl get deployments
+- kubectl get services
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+redis-7f5f77dc44-qmx56   1/1       Running   0          8d
+```
+
+```
+kubectl get namespaces
+NAME          STATUS    AGE
+default       Active    9d
+kube-public   Active    9d
+kube-system   Active    9d
+```
+
+```
+kubectl get replicasets
+NAME               DESIRED   CURRENT   READY     AGE
+redis-7f5f77dc44   1         1         1         8d
+```
+
+```
+kubectl get deployments
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+redis     1         1         1            1           8d
+```
+
+```
+kubectl get services
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP    9d
+redis        ClusterIP   10.108.112.135   <none>        8002/TCP   8d
+```
+
+detailed manuffest of a specific resource
+- kubectl get pods busybox -o yaml
+
+```
+kubectl get pods redis-7f5f77dc44-qmx56 -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+
+(snip)
+```
+
+## Swagger specification and Open API
+
+K8s APU use a Swagger specification
+- https://swagger.io/specification/
+- this evolving toward the OpenAPI
+
+OpenAPI initiative
+- It is usefule, auto-generate client code
+- https://www.openapis.org/
+
+## Additional Resource Management Methods
+access log with endpoins
+- GET /api/v1/namespaces/{namespace}/pods/{name}/exec
+- GET /api/v1/namespaces/{namespace}/pods/{name}/logs
+- GET /api/v1/namespaces/{namespace}/pods/{name}/portforward
+- GET /api/v1/watch/{namespace}/pods/{name}
+
+Kubectl: access the logs of a container
+- kubectl logs --help
+- kubectl exec --help
+- kubectl port-forward --help
+- kubectl attach --help
+
+```
+kubectl logs --help
+Print the logs for a container in a pod or specified resource. If the pod has only one container, the container name isoptional.
+
+Aliases:
+logs, log
+
+Examples:
+  # Return snapshot logs from pod nginx with only one container
+  kubectl logs nginx
+
+  # Return snapshot logs for the pods defined by label app=nginx
+  kubectl logs -lapp=nginx
+
+  # Return snapshot of previous terminated ruby container logs from pod web-1
+  kubectl logs -p -c ruby web-1
+
+  # Begin streaming the logs of the ruby container in pod web-1
+  kubectl logs -f -c ruby web-1
+
+  # Display only the most recent 20 lines of output in pod nginx
+  kubectl logs --tail=20 nginx
+
+  # Show all logs from pod nginx written in the last hour
+  kubectl logs --since=1h nginx
+
+  # Return snapshot logs from first container of a job named hello
+  kubectl logs job/hello
+
+  # Return snapshot logs from container nginx-1 of a deployment named nginx
+  kubectl logs deployment/nginx -c nginx-1
+
+Options:
+  -c, --container='': Print the logs of this container
+  -f, --follow=false: Specify if the logs should be streamed.
+      --include-extended-apis=true: If true, include definitions of new APIs via calls to the API server. [default true]
+      --interactive=false: If true, prompt the user for input when required.
+      --limit-bytes=0: Maximum bytes of logs to return. Defaults to no limit.
+      --pod-running-timeout=20s: The length of time (like 5s, 2m, or 3h, higher than zero) to wait until at least one pod is running
+  -p, --previous=false: If true, print the logs for the previous instance of the container in a pod if it exists.
+  -l, --selector='': Selector (label query) to filter on.
+      --since=0s: Only return logs newer than a relative duration like 5s, 2m, or 3h. Defaults to all logs. Only one ofsince-time / since may be used.
+      --since-time='': Only return logs after a specific date (RFC3339). Defaults to all logs. Only one of since-time /since may be used.
+      --tail=-1: Lines of recent log file to display. Defaults to -1 with no selector, showing all log lines otherwise 10, if a selector is provided.
+      --timestamps=false: Include timestamps on each line in the log output
+
+Usage:
+  kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+```
+
+```
+kubectl exec --help
+Execute a command in a container.
+
+Examples:
+  # Get output from running 'date' from pod 123456-7890, using the first container by default
+  kubectl exec 123456-7890 date
+
+  # Get output from running 'date' in ruby-container from pod 123456-7890
+  kubectl exec 123456-7890 -c ruby-container date
+
+  # Switch to raw terminal mode, sends stdin to 'bash' in ruby-container from pod 123456-7890
+  # and sends stdout/stderr from 'bash' back to the client
+  kubectl exec 123456-7890 -c ruby-container -i -t -- bash -il
+
+  # List contents of /usr from the first container of pod 123456-7890 and sort by modification time.
+  # If the command you want to execute in the pod has any flags in common (e.g. -i),
+  # you must use two dashes (--) to separate your command'sflags/arguments.
+  # Also note, do not surround your command and its flags/arguments with quotes
+  # unless that is how you would execute it normally (i.e.,do ls -t /usr, not "ls -t /usr").
+  kubectl exec 123456-7890 -i -t -- ls -t /usr
+
+Options:
+  -c, --container='': Container name. If omitted, the firstcontainer in the pod will be chosen
+  -p, --pod='': Pod name
+  -i, --stdin=false: Pass stdin to the container
+  -t, --tty=false: Stdin is a TTY
+
+Usage:
+  kubectl exec POD [-c CONTAINER] -- COMMAND [args...] [options]
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+```
+
+```
+
+➜  Kubernetes-memo git:(master) ✗ kubectl port-forward --help
+Forward one or more local ports to a pod.
+
+Examples:
+  # Listen on ports 5000 and 6000 locally, forwarding data to/from ports 5000 and 6000 in the pod
+  kubectl port-forward mypod 5000 6000
+
+  # Listen on port 8888 locally, forwarding to 5000 in the pod
+  kubectl port-forward mypod 8888:5000
+
+  # Listen on a random port locally, forwarding to 5000 in the pod
+  kubectl port-forward mypod :5000
+
+Options:
+  -p, --pod='': Pod name
+
+Usage:
+  kubectl port-forward POD [LOCAL_PORT:]REMOTE_PORT [...[LOCAL_PORT_N:]REMOTE_PORT_N] [options]
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+```
+
+```
+kubectl attach --help
+Attach to a process that is already running inside an existing container.
+
+Examples:
+  # Get output from running pod 123456-7890, using the first container by default
+  kubectl attach 123456-7890
+
+  # Get output from ruby-container from pod 123456-7890
+  kubectl attach 123456-7890 -c ruby-container
+
+  # Switch to raw terminal mode, sends stdin to 'bash' in ruby-container from pod 123456-7890
+  # and sends stdout/stderr from 'bash' back to the client
+  kubectl attach 123456-7890 -c ruby-container -i -t
+
+  # Get output from the first pod of a ReplicaSet named nginx
+  kubectl attach rs/nginx
+
+Options:
+  -c, --container='': Container name. If omitted, the firstcontainer in the pod will be chosen
+      --pod-running-timeout=1m0s: The length of time (like 5s, 2m, or 3h, higher than zero) to wait until at least one pod is running
+  -i, --stdin=false: Pass stdin to the container
+  -t, --tty=false: Stdin is a TTY
+
+Usage:
+  kubectl attach (POD | TYPE/NAME) -c CONTAINER [options]
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+```
+
+## Pod Logs and Exec
+check log of the container
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+redis-7f5f77dc44-qmx56   1/1       Running   0          8d
+```
+
+```
+kubectl logs redis-7f5f77dc44-qmx56
+
+1:C 29 Dec 19:34:39.877 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 29 Dec 19:34:39.877 # Redis version=4.0.6, bits=64, commit=00000000, modified=0, pid=1, just started
+1:C 29 Dec 19:34:39.877 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+1:M 29 Dec 19:34:39.878 * Running mode=standalone, port=6379.
+1:M 29 Dec 19:34:39.879 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+1:M 29 Dec 19:34:39.879 # Server initialized
+1:M 29 Dec 19:34:39.879 * Ready to accept connections
+```
+
+```
+kubectl exec -ti redis-7f5f77dc44-qmx56 bash
+
+root@redis-7f5f77dc44-qmx56:/data#
+root@redis-7f5f77dc44-qmx56:/data# redis-cli
+127.0.0.1:6379>
+```
+
 # Q&A
 ## Chapter 1
 ## Chapter 2
