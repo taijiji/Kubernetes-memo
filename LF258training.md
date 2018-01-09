@@ -1292,7 +1292,7 @@ kube-system   Active    10d
 lfs258        Active    2m
 ```
 
-## LAb5
+## LAB5
 https://lms.quickstart.com/custom/858487/Lab5.pdf
 
 
@@ -1368,6 +1368,52 @@ kubectl delete ns lfs258
 
 namespace "lfs258" deleted
 ```
+
+# Chapter 6: Replication Controllers and Deployments
+
+## Reviewing Pods
+
+A pod shares a simple IP address among all the containers in the pods.
+
+minimalistic pods
+
+```
+vi redis.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+spec:
+  containers:
+  - image: redis:3.2
+    imagePullPolicy: IfNotPresent
+    name: redis
+  restartPolicy: Always
+```
+
+```
+kubectl create -f redis.yaml
+
+pod "redis" created
+```
+
+```
+kubectl get pod
+
+NAME                     READY     STATUS    RESTARTS   AGE
+redis                    1/1       Running   0          4m
+```
+
+## Replication Controllers
+
+Replica Sets: new class of Replicatin Controllers
+Replication Contollers
+- Define: what a pod should be
+- Define: how may you want running
+
+
+
 
 
 # Others
