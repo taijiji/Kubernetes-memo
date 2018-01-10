@@ -1406,14 +1406,61 @@ redis                    1/1       Running   0          4m
 ```
 
 ## Replication Controllers
+Doc
+- https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/
 
 Replica Sets: new class of Replicatin Controllers
 Replication Contollers
 - Define: what a pod should be
 - Define: how may you want running
 
+Sample: redis Relication Controller
 
+```
+kubectl get rc redis -o yaml
+```
 
+scalability : change the number of desited replicas
+
+```
+kubectl scale rc redis --replicas=5
+```
+
+--watch: keep to display result
+
+```
+kubectl get pods --watch
+```
+
+## Replication Controller Specifications
+
+labels
+- to count the number of pods. 
+- key-value pair.
+
+```
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    app: redis
+  template:
+    metadata:
+      name: redis
+      labels:
+        app: redis
+    spec:
+      containers:
+         - image: redis:3.2
+           name: redis
+```
+
+## Towrds Deployments
+Rolling updates
 
 
 # Others
