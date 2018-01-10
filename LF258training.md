@@ -1460,7 +1460,65 @@ spec:
 ```
 
 ## Towrds Deployments
-Rolling updates
+Rolling updates has many problem: lose connectivity, leave the cluster in a bad state.  
+
+Deployments
+- To avoid problems when scaling the RC on client side.
+- extensions/v1beta1 API group. API extentionsv
+- allow server-side updates to pods at a specified rate
+- Used for canary and otehr deployment patterns
+
+```
+curl http://127.0.0.1:8080/apis/extesions/v1beta1
+
+{
+    "kind": "APIresourceList",
+    "groupVersion": "extentions/v1beta1",
+    "resources": [
+        {
+            "name": "deployments",
+            "namespaced": true,
+            "kind": "Deployment"
+        },
+    ]
+
+}
+```
+
+Cretea a Delployment with a sigle contaier per pods
+
+```
+kubectl run nginx --image=nginx
+
+deployment "nginx" created
+```
+
+```
+kubectl get deployments
+
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx     1         1         1            0           4m
+redis     1         1         1            1           12d
+```
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+nginx-d5dc44cf7-9wd68    1/1       Running   0          5m
+redis                    1/1       Running   0          1d
+redis-7f5f77dc44-kfnsh   1/1       Running   0          2d
+```
+
+
+Replica Sets(RS)
+- Deployments generate Replica Sets(RS)
+- the new generation of RC.
+- it bring set-base pods selector
+
+
+
+
 
 
 # Others
