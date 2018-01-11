@@ -1516,9 +1516,79 @@ Replica Sets(RS)
 - the new generation of RC.
 - it bring set-base pods selector
 
+## Labels
+Every resource cancontain labels in its metadata
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+
+...
+    labels:
+        pod-template-hash: "3378155678"
+        run : ghost
+```
 
 
+By default, Deployment with "kubectl run" adds label to the pods
 
+guery by label, and display labels
+
+```
+kubectl get pods -l run=nginx
+
+NAME                    READY     STATUS    RESTARTS   AGE
+nginx-d5dc44cf7-9wd68   1/1       Running   0          1d
+```
+
+```
+kubectl get pods -Lrun
+
+NAME                     READY     STATUS    RESTARTS   AGE       RUN
+nginx-d5dc44cf7-9wd68    1/1       Running   0          1d        nginx
+redis                    1/1       Running   0          2d
+redis-7f5f77dc44-kfnsh   1/1       Running   0          4d
+```
+
+define labels in pod templates and in specificatins of Deployments
+
+
+```
+kubectl label pods ghost-3378155678-eq5i6 foor=bar
+```
+
+add label "foo = bar" to nginx-d5dc44cf7-9wd68 Pods
+
+```
+kubectl label pods nginx-d5dc44cf7-9wd68 foor=bar
+
+pod "nginx-d5dc44cf7-9wd68" labeled
+```
+
+```
+kubectl get pods --show-labels
+NAME                     READY     STATUS    RESTARTS   AGE       LABELS
+nginx-d5dc44cf7-9wd68    1/1       Running   0          1d        foor=bar,pod-template-hash=818700793,run=nginx
+redis                    1/1       Running   0          2d        <none>
+redis-7f5f77dc44-kfnsh   1/1       Running   0          4d        app=redis,pod-template-hash=3919338700
+```
+
+query and select resource using labels
+
+use a "nodeSelector" in a pod definition, add specific labels to certain nodes in cluseter and use those labels in the pod.
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+  nodeSelector:
+    disktype: ssd
+```
 
 
 # Others
