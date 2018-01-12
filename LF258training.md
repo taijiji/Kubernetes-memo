@@ -1590,6 +1590,190 @@ spec:
     disktype: ssd
 ```
 
+## How Do Deployments work
+
+Deployments create Replica Sets
+
+Replica Setes
+- new version of replication Controllers
+- They make sure the right amount of pods is running at all times.
+
+Deployment allows to create multiple Replica Sets for rolling updates and rollbacks.
+- By scaling RS up and down.
+
+see deployment status
+- K8s dashbord
+- CLI
+
+```
+kubectl get deployments
+
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx     1         1         1            1           2d
+redis     1         1         1            1           14d
+```
+
+```
+kubectl get rs
+
+NAME               DESIRED   CURRENT   READY     AGE
+nginx-d5dc44cf7    1         1         1         2d
+redis-7f5f77dc44   1         1         1         14d
+```
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+nginx-d5dc44cf7-9wd68    1/1       Running   0          2d
+redis                    1/1       Running   0          3d
+redis-7f5f77dc44-kfnsh   1/1       Running   0          4d
+```
+
+Deployments can be scaled
+
+```
+kubectl scale deployment/nginx --replicas=4
+
+deployment "nginx" scaled
+```
+
+```
+kubectl get deployments
+
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx     4         4         4            4           2d
+redis     1         1         1            1           14d
+```
+
+```
+kubectl get rs
+
+NAME               DESIRED   CURRENT   READY     AGE
+nginx-d5dc44cf7    4         4         4         2d
+redis-7f5f77dc44   1         1         1         14d
+```
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+nginx-d5dc44cf7-4w8v9    1/1       Running   0          39s
+nginx-d5dc44cf7-9kk55    1/1       Running   0          39s
+nginx-d5dc44cf7-9wd68    1/1       Running   0          2d
+nginx-d5dc44cf7-dvgk4    1/1       Running   0          39s
+redis                    1/1       Running   0          3d
+redis-7f5f77dc44-kfnsh   1/1       Running   0          4d
+```
+
+update all your pods to a specific image version.   
+"latest" is not a version number.
+
+
+```
+kubectl set image deployment/nginx nginx=nginx:1.10 --all
+
+deployment "nginx" image updated
+```
+
+```
+kubectl get rs --watch
+
+NAME               DESIRED   CURRENT   READY     AGE
+
+nginx-5f8bcd574c   2         2         0         5s  << New
+nginx-d5dc44cf7    3         3         3         2d  << Old
+redis-7f5f77dc44   1         1         1         14d
+```
+
+a few minitues later.
+New Replica Set was created.
+- new RS was scale up
+- original RS was scale down.
+
+```
+kubectl get rs --watch
+
+NAME               DESIRED   CURRENT   READY     AGE
+nginx-5f8bcd574c   4         4         4         1m  << New
+nginx-d5dc44cf7    0         0         0         2d  << Old
+redis-7f5f77dc44   1         1         1         14d
+```
+
+To trigger a rolling update by edit deployment resrouce
+
+```
+kubectl edit deployment/nginx
+```
+
+## Deployment Rollbacks
+
+rollback to a previous revision by scaling up and down the RS
+- kubectl run --record
+
+```
+kubectl run ghost --image=ghost --record
+```
+
+```
+kubectl get deployments ghost -o yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+>>  deployment.kubernetes.io/revision: "1"
+>>  kubenetes.io/change-cause: kubectl run ghost --image=ghost --record
+  creationTimestamp: 2018-01-12T20:43:44Z
+  generation: 1
+  labels:
+    run: ghost
+  name: ghost
+  namespace: default
+  resourceVersion: "485769"
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/ghost
+  uid: 47abc22c-f7d9-11e7-a7f8-0800278459df
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: ghost
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: ghost
+    spec:
+      containers:
+      - image: ghost
+        imagePullPolicy: Always
+        name: ghost
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:
+  conditions:
+  - lastTransitionTime: 2018-01-12T20:43:44Z
+    lastUpdateTime: 2018-01-12T20:43:44Z
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  replicas: 1
+  unavailableReplicas: 1
+  updatedReplicas: 1
+```
+
 
 # Others
 Resource
