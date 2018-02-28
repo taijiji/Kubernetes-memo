@@ -1712,11 +1712,27 @@ rollback to a previous revision by scaling up and down the RS
 - kubectl run --record
 
 ```
+# create a deployment
 kubectl run ghost --image=ghost --record
 ```
 
 ```
+kubectl get deployments
+
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+ghost     1         1         1            1           46d
+```
+
+```
+ kubectl get replicaset
+NAME               DESIRED   CURRENT   READY     AGE
+ghost-688d7cc85f   0         0         0         36m
+ghost-8449997474   1         1         1         46d
+```
+
+```
 kubectl get deployments ghost -o yaml
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -1774,6 +1790,146 @@ status:
   updatedReplicas: 1
 ```
 
+You can now roll back
+
+```
+kubecrtl rollout undo
+```
+
+```
+# update Container image
+kubectl set image deployment/ghost ghost=ghost:0.9 --all
+
+deployment "ghost" image updated
+```
+
+```
+kubectl rollout history deployment/ghost
+
+deployments "ghost"
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+```
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+ghost-688d7cc85f-6nktz   1/1       Running   0          3m
+```
+
+```
+kubectl rollout undo deployment/ghost
+
+deployment "ghost" rolled back
+```
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS              RESTARTS   AGE
+ghost-688d7cc85f-6nktz   0/1       Terminating   0          5m
+ghost-8449997474-wtrgq   1/1       Running       0          46s
+```
+
+a few seconds later
+
+```
+kubectl get pods
+
+NAME                     READY     STATUS    RESTARTS   AGE
+ghost-8449997474-wtrgq   1/1       Running   0          1m
+```
+
+```
+kubectl rollout history deployment/ghost
+
+deployments "ghost"
+REVISION  CHANGE-CAUSE
+2         <none>
+3         <none>
+```
+
+## 6.12. Deployments
+
+roll back to a specific revision
+
+```
+kubecrtl rollout undo --to-revision=2 deployment/ghost
+```
+
+Edit a Deployment
+
+```
+kubectl edit deployment/ghost
+```
+
+Pause and resume a Deployment
+
+```
+kubectl rollout pause deployment/ghost
+```
+
+```
+kubectl rollout resume deployment/ghost
+```
+
+Rolling updade on Replication Controllers
+(Note! Done on the client side. If you close your client. The rolling update will stop)
+
+```
+kubectl rolling-update
+```
+
+## Deployments demo
+- minikube status
+- kubectl get pods
+- kubectl run ghost --image=ghost
+  - create deployment
+- kubectl get deployments
+- kubectl get replicaset
+- kubectl get pods
+- kubectl expose deploy/ghost --port=2368 --type=NodePort
+  - open port
+- minikube service ghost
+- kubectl get pods
+- kubectl scale deployment/ghost --replicas=10
+  - make 10 pods
+- kubectl get pods
+- kubectl get deployments ghost -o json
+- kubectl get deployments ghost -o yaml
+- kubectl get pods -Lrun
+- kubectl label pods ghost-8449997474-wtrgq run- 
+  - remove lable
+- kubectl get pods -Lrun
+- kubectl set image deployment/ghost ghost=ghost:0.9
+  - change image ghost:0.9
+- kubectl get rs ( = kubectl get replicaset)
+- kubectl get rs --watch
+- kubectl get pods
+
+Rolling update
+
+- kubectl rollout history deployment/ghost
+- kubectl get pods ghost-8449997474-wtrgq -o yaml
+  - check "image: ghost:0.9"
+- kubectl run redis --image=redis --record
+- kubectl rollout history deployment/redis
+- kubectl get pods
+- kubectl get rs
+- kubectl get pods
+- kubeclt rollout undo deployment/ghost
+- kubectl get rs --watch
+- kubectl get rs
+- kubectl get pods
+- kubectl get pods ghost-8449997474-wtrgq -o yaml
+  - check "image: ghost"
+
+## Lab6
+https://lms.quickstart.com/custom/858487/Lab6.pdf
+
+# Chapter 7: Volumes and Application Data
 
 # Others
 Resource
