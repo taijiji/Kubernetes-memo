@@ -1931,6 +1931,34 @@ https://lms.quickstart.com/custom/858487/Lab6.pdf
 
 # Chapter 7: Volumes and Application Data
 
+## Introducing Volumes
+single container, single volume(scratch-volume)
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+    name: busybox
+    namespace: default
+spec:
+    containers:
+    - image: busybox
+      name: busy
+      command:
+        - sleep
+        - "3600"
+      volumeMounts: <<
+    - mountPath: /scratch << 
+    volumes: <<
+    - name: scratch-volume << single-volume
+      emptyDir: {} << Volume type
+```
+
+kubelet will crate an empty directry and will delete directry.
+
+## Volume Types
+
+
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
