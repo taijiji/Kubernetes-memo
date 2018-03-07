@@ -1957,6 +1957,20 @@ spec:
 kubelet will crate an empty directry and will delete directry.
 
 ## Volume Types
+emptyDIR: an emppty directory that gets erased when the Pods deis.
+hostPath: volumes servive Pod deletion
+
+NFS(Network File System) and iSCSI(Internete Small Computer System Interface)
+are choice for multiple readers scenarios.
+
+CephFS or GlusterFS can be a choisce for multiple writers in your kubenetes cluster.
+
+GCEpersitentDisk : volumes of GCE
+awsElasticBlockStore: volumes of AWS
+
+## A vokumes Exercise
+volumes are defined in pods
+
 
 
 # Others
