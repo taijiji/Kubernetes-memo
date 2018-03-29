@@ -1991,3 +1991,6 @@ Discussion Board
 ## Hyperkube
 - hyperkube is an all-in-one binary for the Kubernetes server components
 - https://github.com/kubernetes/kubernetes/tree/master/cluster/images/hyperkube
+
+# mypage
+https://training.linuxfoundation.org/cas?destination=portal
