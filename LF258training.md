@@ -1968,8 +1968,125 @@ CephFS or GlusterFS can be a choisce for multiple writers in your kubenetes clus
 GCEpersitentDisk : volumes of GCE
 awsElasticBlockStore: volumes of AWS
 
-## A vokumes Exercise
-volumes are defined in pods
+## Shared Volume Example
+2 containers with access to a shared volume
+
+```
+containers:
+    - image: busybox
+  volumeMounts:
+    - mountPath: /busy
+  name: test
+  name: busy
+    - image: busybox
+  volumeMounts:
+    - mountPath: /box
+  volumes:
+    - name: test
+    emptyDir: {}
+```
+
+```
+kubectl exec -ti busybox -c box -- touch /box/foobar
+
+kubectl exec -ti busybox -c box -- ls -l /busy total 0
+```
+
+## Persistent Volumes and Claims
+
+Persistent Volume : PV
+- Storage abstraction
+- Pods define a volume type persistentVolumeClaim(PVC)
+- The cluster then attached the persistentVolume
+
+Phases to persistent storage
+1. Provisioning
+    - created from PV by the cluster administrator
+    - Requested from a dynamic souce(Cloud Provider)x
+2. Binding
+    - a control loop on the master notice the PVC
+    - containing an amount of storage, access request, a particular StorageClass.
+    - The watcher locates a matching PV or waits for the StorageClass provisioner to create one.
+    - the PV must match at least the strage amount requested
+3. Use
+    - the bound volume is mounted for the Pod to use.
+4. Releasing
+    - the Pod is done with the volume and an API request is sent, deleting the PVC.
+    - The volume remains in the state from when the claim is deleted until available to a new claim.
+    - The resident data remains depending on the persistentVolumeReclaimPolicy
+
+## Persistent Volume
+PersistentVolume using the hostPath type.
+
+```
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+    name: 10Gpv01
+    labels:
+        type: local
+spec:
+    capacity:
+        storage: 10Gi
+    accessModes:
+        - ReadWriteOnce
+    hostPath:
+        path: "/somepath/data01"
+```
+
+- Persustebt volumes are not a namespace objects.
+- v1.9: allows static provisioning of Raw Block Volume. support the Fibre Channel plugin.
+
+## Persistent Volume Claim
+persistentVolumeClaim
+- With a persistent volume created in your cluster, you can then write a manifest for a claim and use that claim in your pod definition.
+
+```
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+    name: myclaim
+spec:
+    accessModes:
+        - ReadWriteOnce
+    Rsouces:
+        requests:
+            storage: 8GI
+(In the Pod)
+
+...
+
+spec:
+    continers:
+
+...
+
+```
+
+the Pod configuration (complex sample?)
+
+```
+volumeMounts:
+    - name: Cephpd
+    mountPath: /data/rbd
+
+  volumes:
+    - mame: rbdpd
+      rbd:
+        monitors:
+        - '10.19.14.22:6789'
+        - '10.19.14.23:6789'
+        - '10.19.14.24:6789'
+        pool: k8s
+        image: client
+        fsType: ext4
+        readOnly: true
+        user: admin
+        keyring: /etc/ceph/keyring
+        imageformat: "2"
+        imagefeatures: "layering"
+```
+
 
 
 
