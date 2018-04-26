@@ -1957,6 +1957,7 @@ spec:
 kubelet will crate an empty directry and will delete directry.
 
 ## Volume Types
+
 emptyDIR: an emppty directory that gets erased when the Pods deis.
 hostPath: volumes servive Pod deletion
 
@@ -1969,6 +1970,7 @@ GCEpersitentDisk : volumes of GCE
 awsElasticBlockStore: volumes of AWS
 
 ## Shared Volume Example
+
 2 containers with access to a shared volume
 
 ```
@@ -2016,6 +2018,7 @@ Phases to persistent storage
     - The resident data remains depending on the persistentVolumeReclaimPolicy
 
 ## Persistent Volume
+
 PersistentVolume using the hostPath type.
 
 ```
@@ -2038,6 +2041,7 @@ spec:
 - v1.9: allows static provisioning of Raw Block Volume. support the Fibre Channel plugin.
 
 ## Persistent Volume Claim
+
 persistentVolumeClaim
 - With a persistent volume created in your cluster, you can then write a manifest for a claim and use that claim in your pod definition.
 
@@ -2087,8 +2091,85 @@ volumeMounts:
         imagefeatures: "layering"
 ```
 
+## Dynamic Provisioning
+
+Dynamic Provisioning
+- starting with K8s v1.4
+- allow cluster to request storage from an exterior, pre-configured source
+- StorageClass API resource allows an administrator to define a persistent volume provisioner of a certain type, passing storage-specific parameters.
+- With StorageClass created,  a user can request a claim, which the API server fills via Autoprovisioning.
+- dynamic Strage: AWS, GCE and Ceph cluster, iSCSI
+
+Storage Class using GCE
+
+```
+apiVersion: storage.k8s.io/v1       # Recently became stable
+kind: StorageClass
+metadata:
+    name: fast                      # Could be any name
+provisioner: kubernetes.io/gce-pd
+parameters:
+    type: pd-ssd
+```
+
+## Secrets
+Secret API
+- The password could be encoded.
+- a casual reading would not give away the password
+
+```
+kubectl get secrets
+
+NAME                  TYPE                                  DATA      AGE
+default-token-tx78l   kubernetes.io/service-account-token   3         118d
+```
+
+Mnually encoded with kubectl create secret
+
+```
+kubectl create secret generic mysql --from-literal=password=root
+
+secret "mysql" created
+```
+
+```
+kubectl get secrets
+
+NAME                  TYPE                                  DATA      AGE
+default-token-tx78l   kubernetes.io/service-account-token   3         118d
+mysql                 Opaque                                1         8m
+```
+
+- A secret is not encrypted, only base64-encoded.You can see the encoded string inside the secret with kubectl.
+- The secret will be decoded and be presented as a string saved to a file.
 
 
+## Using Secrets via Environment Variables
+
+Configuring secret variable in Pods
+
+```
+...
+
+spec:
+    containers:
+    - image: mysql:5.5
+      env:
+      - name: MYSQL_ROOT_PASSWORD
+        valueFrom:
+            secretKeyRef:
+                name: mysql
+                key: password
+          name: mysql
+```
+
+- the number of Secrets is 1MB limit to theier size
+- Each secert occupy memory, along with other API, objects...
+- They are stored in the tmpfs storage on the host node, and are only sent to the host running Pod.
+  All volumes requested by a Pod must be mounted before the containers within the Pod are started
+- a Secret must exist prior to being requested
+
+## Mounting Secrets as Volumes
 
 # Others
 Resource
