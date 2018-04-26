@@ -2171,6 +2171,95 @@ spec:
 
 ## Mounting Secrets as Volumes
 
+Mount secrets as files using a volume definition in a pod manifest
+
+```
+...
+
+spec:
+    containers:
+    - image: busybox
+      command:
+        - sleep
+        - "3600"
+      volumeMounts:
+      - mountPath: /mysqlpassword
+        name: mysql
+      name: busy
+    volumes:
+    - name: mysql
+        secret:
+            secretName: mysql
+```
+
+once the pod is running, you can verify that the secret is indeed accessible in the container.
+
+```
+kubectl exec -ti busybox -- cat /mysqlpassword/password
+```
+
+## Portable Data with ConfigMaps
+
+Secrets with ConfigMaps, except the data is not encoded.
+
+ConfigMap can be used in several way
+- A pod can use the data as environment variables from one or more sources.
+- The values countained inside can be passed to commands inside the pods.
+- A Volume or a file in a Volume can be created, including different names and object will have a "data" section countaining the content of the file.
+
+config.js
+
+```
+kubectl get configmap foobar -o yaml
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: foobar
+data:
+    config.js: |  <<
+        {
+```
+
+ConfigMpas can be consumed in various ways.
+- Pod environmental variables from single or multiple ConfigMaps
+- Populate Volume from ConfigMap
+- Add ConfigMap data to specific path in Volume
+- Set file names and access mode in Volume from ConfigMap data
+- Can be used by system components and controllers.
+
+## Using ConfigMaps
+
+You can use ConfigMaps as environmental variables or using a volume mount.
+
+In the case of environment variables, your pod manifest will use the valueFrom key and the configMapKeyRef value to read the values
+
+```
+env:
+- name: SPECIAL_LEVEL_KEY
+  valueFrom:
+    configMapKeyRef:
+      name: special-config
+      key: special.how
+```
+
+with volumes, you define a volume with the configMap type in your pod and mount it where it needs to be used.
+
+```
+volumes:
+    - name: config-volume
+       configMap:
+         name: special-config
+```
+
+## LAB
+1. https://lms.quickstart.com/custom/858487/LAB_9.1.p
+2. https://lms.quickstart.com/custom/858487/LAB_9.2.pdf
+3. https://lms.quickstart.com/custom/858487/LAB_9.3.pdf
+4. https://lms.quickstart.com/custom/858487/LAB_9.4.pdf
+
+# Chapter 10 ingress
+
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
