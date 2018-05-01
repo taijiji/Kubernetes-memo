@@ -2408,6 +2408,100 @@ rules:
 
 # Chapter 11 Scheduling
 
+## kube-scheduler
+kube-scheduler
+- determins which nodes will run a Pod
+- using a topology-aware algorithm.
+- Scheduler tracks the set of nodes in your cluster, filter
+- uses priority functions to determin
+- Send to the kubelet on the node for creation.
+
+Default sheduling
+- decition can be affected through the use of "Labels" on node or Pods.
+- Labels of "podAffinity(類似)", "taints(汚染)", "pod bindings" allow for configuration from the Pod/Nodes
+- "Tolerations(忍耐)", allow a Pod to work with a node.
+- "taint" preclude a Pod being shedule
+
+Evict(強制退去) Pods from a node should the required condition no longer be true
+- "RequiredDuringScheduling"
+- "RequiredDuringExecution"
+
+## Predicates
+"Predicates" to find available nodes, then ranks each node using "Priority function"
+- "PodFitsHost"
+- "NoDiskConflict"
+- "Predicates" are evalueated in a particular and configurable order.
+
+example "predicate"
+
+HostNamePred ( as known HostName )
+- filters out nodes that do not match the node name, specified in the pod specification.
+
+PodFitsResources
+- make sure that the available CPU and memory can fit the resources required by the Pod.
+
+Policy which can order predicates, give special weights to priorities.
+
+hardPodAffinitySymmetricWeight
+- deploys Pods
+- exsample: set Pod A to run with Pod B, then Pod B should automatically be run with Pod A.
+
+
+## Priorities
+
+Priorities
+- functions used to weight resources.
+
+"SelectorSpreadPriority" setting.
+- ranks nodes based on the number of existing runnning pods.
+- will select the node with the least amount of Pods.
+- This is a basic way to spead Pods across the cluster.
+
+"ImageLocalityPriorityMap"
+- favors nodes which aleady have downloaded container images.
+- The total sum of image size is compared with the largest having the highest priority.
+- does not check the images about to be used.
+
+a list of priroties
+- master/pkg/scheduler/algorithm/priorities
+
+
+## Scheduing Policies
+The default sheduler contains a number of "predicates" and "priorities".
+
+Scheduler policy file
+
+```
+"kind" : "Policy",
+"apiVersion" : "v1",
+"predicates" : [
+        {"name" : "MatchNodeSelector",      "oeder" : 6},
+        {"name" : "PodFitsHostPorts",       "oeder" : 2},
+        {"name" : "PodFitsResources",       "oeder" : 3},
+        {"name" : "NoDiskConflict",         "oeder" : 4},
+        {"name" : "PodToleratesNodeTaints", "oeder" : 5},
+        {"name" : "PodFitsHost",            "oeder" : 1}
+    ],
+"priorities" : [
+        {"name" : "LeastRequestedPriority",     "weight" : 1},
+        {"name" : "BalanceResourceAllocation",  "weight" : 1},
+        {"name" : "ServiceSpreadingPriority",   "weight" : 2},
+        {"name" : "EqualPriority",              "weight" : 1},
+    ],
+"hardPodAffinitySymmetricWeight" : 10
+}
+```
+
+configure a scheduler with this policy
+- using the "--policy-config-file" parameter
+- using the "--scheduler-name" parameter
+
+Multiple scheduler
+- conflict in the Pod allocation.
+- the current solutuion for avoid conflict, for the local "kubelet" to return the Pods to the scheduler for reassignment
+
+## Pod Specification
+
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
