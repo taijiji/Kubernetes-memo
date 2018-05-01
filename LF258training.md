@@ -959,6 +959,7 @@ redis-7f5f77dc44-qmx56   1/1       Running   0          8d
 
 ```
 kubectl get namespaces
+
 NAME          STATUS    AGE
 default       Active    9d
 kube-public   Active    9d
@@ -2259,6 +2260,153 @@ volumes:
 4. https://lms.quickstart.com/custom/858487/LAB_9.4.pdf
 
 # Chapter 10 ingress
+
+- LoadBalancer: route traffic based on the request host or path.
+- Ingress Controller
+    - it does not run as part of the kube-controller-manager binary.
+    - deploy multiple controllers, each with unique configurations
+    - A controller uses Ingress Rules to handle traffic to and from outside the cluster.
+    - Theare are two supported controller: GCE, nginx.HAProxy, Traefix.io
+
+## nginx
+
+ingress-nginx
+- https://training.linuxfoundation.org/cas?destination=portal
+- Customization via ConfigMap, Annnotations, a Custom Template
+- Comfig Template
+    - Easy integration with RBAC
+    - uses the annotation kubernetes.io/ingress.class: "nginx"
+    - L7 traffic : proxy-real-ip-cidr
+    - Bypasses kube-proxy to allow session affinity
+    - Does not use conntrack entries for iptables DNAT
+    - TLS requires the host field to be defined
+
+## Google Load Balancer Controller(GLBC)
+
+GCE Ingress Controller
+- YAML file to make the process easy
+
+GLBC Controller
+- must create a ReplicationController with a single replica, 3 services for the application Pod, an Ingless with 2 hostnames and 3 endpoints for each services.
+
+The multi-pool path
+- Global Forwarding Rule -> Target HTTP Proxy -> URL map -> Backend Service -> Instance Group
+
+TLS Ingress
+- only supports port 443 and assumes TLS termination, currently.
+- no suport SNI, only using the first Cetificate.
+- The TLS secret must contain keys named tls.crt and tls.key
+
+## Ingress API Resources
+
+Ingress objects are Deployments and ReplicaSet.
+
+POST to the API server
+
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+name: ghost
+spec:
+rules:
+    - host: ghost.192.168.99.100.nip.io
+http:
+paths:
+    - backend:
+        serviceName: ghost
+        servicePort: 2368
+```
+
+manage ingress resources
+
+```
+kubectl get ingress
+
+No resources found.
+```
+
+```
+kubectl delete ingress <ingress_name>
+```
+
+```
+kubectl edit ingress <ingress_name>
+```
+
+## Deploying the Ingress Controller
+
+Creating with kubectl.
+default HTTP backend which serves 404 pages
+
+```
+kubectl create -f backend.yaml
+```
+
+```
+kubectl get pods,rc,svc (dummy result)
+
+NAME                             READY     STATUS    RESTARTS   AGE
+po/default-http-backend-xvep8    1/1       Running   0         4d
+po/nginx-ingress-cotroller-fkshm 1/1       Running   0         4d
+
+
+NAME             TYPE        DESIRED    CURRENT    READY     AGE
+rc/default-http-backend      1          1          0         122d
+
+
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+svc/default-http-backend     10.0.0.212      <none>        80/TCP     122d
+svc/kubernetes   ClusterIP   10.0.0.1        <none>        443/TCP    124d
+```
+
+## Creating as Ingress Rule
+Ingress quckly get exposed
+
+```
+kubectl run ghost --image=ghost
+```
+
+```
+kubectl expose deployments ghost --port=2368
+```
+
+Deployment exposed and the Ingress rule. (a single rule)
+
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: ghost
+spec:
+    rules:
+    - host: ghost.192.168.99.100.nip.io
+      http:
+      paths:
+      - backend:
+            serviceName: ghost
+            servicePort: 2368
+```
+
+## Multiple Rules
+
+```
+rules:
+- host: ghost.192.168.99.100.nip.io
+    http:
+    paths:
+    - backend:
+        serviceName: ghost
+        servicePort: 2368
+- host: ghost.192.168.99.100.nip.io
+    http:s
+    paths:
+    - backend:
+        serviceName: nginx
+        servicePort: 80
+```
+
+# Chapter 11 Scheduling
 
 # Others
 Resource
