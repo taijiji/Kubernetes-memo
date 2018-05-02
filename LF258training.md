@@ -2502,6 +2502,35 @@ Multiple scheduler
 
 ## Pod Specification
 
+Most scheduling decisions can be made as part of the Pod specification.
+A pod specification contain several fields
+- nodeName
+    - allow a Pod to be assinged to a single/group node with labels
+- nodeSelector
+    - allow a Pod to be assinged to a single/group node with labels
+- affinity / anti-affinity
+    - Used to "require" or "prefer" witch nodes is used by the scheduler.
+- tolerations
+    - "tains" allows a node to be labeled such that Pods would not be scheduled for some reason.
+    - A tolerations allows a Pod to ignore the "taint" and be scheduled assuming other requirements are met.
+- schedulerName
+    - Deploy a custom scheduler
+
+## Specifying the Node Label
+
+nodeSelector
+
+```
+spec:
+    containers:
+    - name: redis
+      image: redis
+    nodeSelector:
+      net: fast
+```
+
+
+
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
