@@ -2726,6 +2726,96 @@ LAST SEEN   FIRST SEEN   COUNT     NAME                        KIND      SUBOBJE
 
 # Chapter 12 Logging and Troubleshooting
 
+## Overview
+
+Monitoring tool(not include in K8s): collect key metrics(CPU, memory, disk usage, network bandwidth)
+- Heapstear: OSS. using "Helm Chart"
+
+Logging tool: across all the nodes is another featear not part of K8s.
+- Fluentd
+    - Unifided logginig layer.
+    - Aggregated logs
+
+Prometheus
+- combines logging, monitoring, alerting
+- time-series database
+
+## Basic Troubleshuooting Steps
+App amay have a shell you an use.
+
+```
+kubectl run busybox --image=busybox --comand sleep 3600
+```
+
+```
+kubectl exec -ti <busybox_pod> -- /bin/sh
+```
+
+```
+kubectl logs pod-name
+```
+
+Without logs, you may consider deploying a "sidecar" container in Pod to generate and handle logging.
+
+To check is networking, including DNS, firewalls and general connectivity
+- using starndard Linux commands and tools.
+
+Security setting
+- "RBAC": provides mandatory or discretionary(一任された) access controll in a granular manner
+- "SELinux", "AppArmor" are comm issues with network-centric applications.
+
+Summary: trouble shooting
+- Errors from the command line
+- Pod logs and state of Pods
+- Use shell to troubleshoot Pod DNS and network
+- Check node logs for errors, make sure there are enough resources allocated.
+- RBAC, SELinux or AppArmor for security settings
+- API calls to and from contollers to kube-apiserver
+- Inter-node network issues, DNS and firewall
+- Master server controllers
+    - control Pods in pending or error state
+    - error in log files
+    - sufficient resources
+
+
+## Monitoring
+- Heapster
+    - part of the Kubernetes project. https://github.com/kubernetes/heapster
+    - used for the Horizontal Pod Autoscaling feature
+    - integraed with the Kubernetes dashboard
+
+- Prometheus
+    - part of the CNCF.
+    - Kubernetes plugin
+    - It has several client libraries to collect aplication level metrics.
+
+
+## Logging Tools
+
+Common logging tool
+- Elasticsearch
+- Logstash
+- Kibana Stak(ELK)
+
+Kubelet in Kubernetes
+- writes container logs to local files(via the Docker logging driver)
+
+kubectl logs in k8s
+- retrieve these logs
+
+Fluentd
+- cluster-wide
+- aggregate logs
+- part of the CNCF
+
+Fluentd for K8s
+- Fluentd agents run on each node via a DaemonSet
+- aggregate the logs and feed to Elasticsearch instance to visualization in a Kibana dashboard.
+
+
+# Chapter 13 Custom Resource Definitions
+
+
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
