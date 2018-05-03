@@ -2516,9 +2516,9 @@ A pod specification contain several fields
 - schedulerName
     - Deploy a custom scheduler
 
-## Specifying the Node Label
 
-nodeSelector
+## Specifying the Node Label
+"nodeSelector"
 
 ```
 spec:
@@ -2529,7 +2529,202 @@ spec:
       net: fast
 ```
 
+- Setting the "nodeSelector" tells the sheduler to place the pod on a node that matches the labels.
+- All listed selectors must be met, but the node could have more labels.
+- any node with a key or "net" set to "fast" would be a candidate for scheduling.
 
+nodeSelector will be deprecated(廃止予定)
+
+## Pod Affinity Rules
+a form of affinity(相性)
+- communicate a lot or share data
+
+anti-affinity
+- For greater fault tolerance, Pods to be as separate as possible.
+- interrogate each node and track the label of running Pods.
+
+Pod affinity rurle
+- use "In" / "NotIn" / "Exists" / "DoesNotExist"
+
+"requiredDuringSchedulingIgnoredDuringExecution"
+- Pod wil nobe scheduled on a node unless following operator is true.
+- if the operator changes to become false in the future, the Pod will continue to run. this cloud be senn as a "hard" rule
+
+"preferredDuringSchedulingIgnoredDuringExecution"
+- choose a node with the desired setting.
+- if no properlu-labbeled nodes are availabe, the Pod will execute anyway.
+- This is more of a soft setting, which declares a preference instead of a requirements
+
+"podAffinity"
+- the scheduler will try to schedule Pods together.
+
+"podAntiAffinity"
+- cause the scheduler to keep Pods on different nodes
+
+"topologyKey"
+- allows a general grouping of Pods deployments
+- Affinity / inverse anti-affinity will try to run on nodes with the declared topology key and running Pods with a particular label.
+- could be any legal key.
+
+"requredDuringScheduling" and admission controller "LimitPodHardAntiAffinityTopoligy" setting => "topologykey" must be set to "kubernetes.io/hostname"
+
+"PrefrredDuringScheduling", an empty "topoligyKey" is assumed to be all, or the combination of kubernetes.io/hostname, failure-domain.beta.kubernetes.io/zone, and failure-domain.beta.kuberntes.io/region
+
+## podAffinity Example
+example of "affonity" and "podAffinity". 
+- but not required if the label is later removed.
+- if this requirement(key:secuirty, value:S1) is not met, the Pod will remain in a "Pending" state.
+
+```
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+        matchExpressions:
+        - key: security
+          operator: In
+          values: - S1
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+```
+
+## podAffinity Example
+
+Avoid a node with a particular label.
+In this case this scheduler will prefer to avoid a node with a key: "security" and valuse:"S2"
+
+```
+podAntiAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+  - weight: 100
+    podAffintyTerm
+      labelSelector:
+        matchExpressions:
+        - key: security
+          operator: In
+          values: - S2
+        topologyKey: kubernetes.io/hostname
+```
+
+"weight" : 1 - 100
+- Scheduler then tries to choose, or avoid the node with the greatest combined value.
+
+## Node Affinity Rules
+
+nodeAffinity(affinity/anti-affinity) is similar and will to replace to nodeSelector.
+
+Node affinity rules
+- use operators(演算子), "In" / "NotIn" / "Exists" / "DoesNotExists" / "Gt" / "Lt"
+- requiredDuringSchedulingIgnoredDuringExecution
+- preferredDuringSchedulingIgnoredDuringExecution
+- requiredDuringSchedulingRequiredDuringExecution (planned)
+
+"nodeSelector" は非推奨(deprecatesd)
+
+## Node Affinity Example
+
+```
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        # require a node with a key of "kubernetes.io/e2w-az-name" has value: tx-aus or tx-dal
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/colo-tx-name
+            operator: In
+            values:
+            - tx-aus
+            - tx-dal
+      preferredDuringSchedulingIgnoredDuringExecution:
+      # extra weight to nodes with key:disk-speed with value:fast or quick
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: disk-speed
+            operator: In
+            values:
+            - fast
+            - quick
+```
+
+## Taints(汚染, 傷)
+A node with "taint" will repel(寄せ付けない,はじく) Pod without "tolerations(容認)" for theat tiant.
+
+taint esxpressed
+- "key=value:effect"
+    - key and value are created by the admin
+
+Handle Pod Scheduling
+- NoSchedule
+    - The scheduler will not schedule a Pod on this node, unless the Pod has this "toration".
+    - Existing Pods continue to run, regardless of tolerations
+- PreferNoSchedule
+    - The scheduler will aboud using this node, unless there are no untainted nodes for the Pods "toleration". Existing Pods are unaffected.
+- NoExecute
+    - This taint will cause existing Pods to be evacuated and no future Pods scheduled.
+    - Sould an existing Pod have a toleration, it will continue to run.
+    - If the Pod "tolerationsSeconds" is set, they will remain for that many seconds, then be evicted(退去).
+    - Certian node issues will cause the "kubectl" to add 3000 second "tolerations" to avoid unneccesassy evictions.
+
+if node has multiple "taints", the scheduler ignore those with matching "tolerations". the remaining unignored "taints" have htier typical effect.
+
+"TaintBaseEvictions(立ち退き)"
+- alpha feature
+- kubelet use taints to rate-limit evictions when the node has problems.
+
+## Tolerations
+
+"tolerations(容認)" on a node are used to schedule Pods on taited nodes.
+- easy way to avaid Pods using the node.
+- Only those with a particular "toleration" would be scheduled
+
+Tolerations operators
+- "Equal"  : default. require a vlue to match
+- "Exists" : not be specified. empty key use "Exist", it will tolerate every taint.
+- "effect" : all "effects" are matched with the declared key.
+
+```
+tolerations:
+- key: "server"
+  operator: "Equal"
+  value: "ap-east"
+  effect: "NoExecute"
+  tolerationSeconds: 3600
+```
+
+- Pod remain on the server with a key:server, value: ap-east for 3600 sec, after the node has been tainted with NoExecute.
+- When the time runs out, the Pod will be evicted
+
+## Custom Scheduler
+
+default scheduling mecahnisms(affinity, taints, policies).
+You can write your own scheduler.(Go language)
+- https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler
+
+If Pod declares a scheduler and container is not running, Pod would remain in a "Pending" state forever.
+
+The end result of the scheduling process is that a pod gets a "binding" that specifies which node it should run on.
+
+A binding is a K8s API primitive in the "api/v1" group.
+
+You can also run mulitple schedulers simultaneously.
+
+You can view the scheduler and other information with.
+
+```
+kubectl get events
+
+kubectl get events
+LAST SEEN   FIRST SEEN   COUNT     NAME                        KIND      SUBOBJECT                  TYPE      REASON                         SOURCE                 MESSAGE
+16m         6d           46        busybox.152914b23b8ef1f9    Pod       spec.containers{busybox}   Normal    Pulling                        kubelet, minikube      pulling image "busybox"
+16m         6d           46        busybox.152914b2d10b40fa    Pod       spec.containers{busybox}   Normal    Pulled                         kubelet, minikube      Successfully pulled image "busybox"
+16m         6d           46        busybox.152914b2d23866ef    Pod       spec.containers{busybox}   Normal    Created                        kubelet, minikube      Created container
+16m         6d           46        busybox.152914b2d63b8234    Pod       spec.containers{busybox}   Normal    Started                        kubelet, minikube      Started container
+6m          6d           2751      minikube.152912a7a6bcdf5d   Node                                 Warning   FailedToStartNodeHealthcheck   kube-proxy, minikube   Failed to start node healthz on 0: listen tcp: address 0: missing port in address
+```
+
+# Chapter 12 Logging and Troubleshooting
 
 # Others
 Resource
