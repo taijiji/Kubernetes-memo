@@ -2815,6 +2815,83 @@ Fluentd for K8s
 
 # Chapter 13 Custom Resource Definitions
 
+## Custom Resource of K8s
+Once Custom Resouces have been added, the objects can be created and accessed using kubectl, etcd, kube-apiserver
+
+To make a new custom resource part of a declarative API
+- Controller or "operator" is an agent that creates and manages one or more instance of a specific stateful app.
+- worked with built-in contoller such as "Deployments", "DaeminSets" and other Rearces.
+
+To add custom resource to your Kubernetes
+- adding a "Custom Resource Definition(CRD)" to the cluster
+    - The easiest, but less flexible
+- Use of "Aggregated APIs(AA)"
+    - more flexible
+    - requires a new API server to be written and added to the cluster
+- Use "Custom Resrouce", adding a new object to the cluster
+    - distinct from built-in resouce
+
+if use RBAC for authorization, you need to grant(承諾) access to the new "Custom Resource Definition(CRD)" resource and controller
+
+if use "Aggregated APIs(AA)", you can use the same or a different authentication process.
+
+
+## Custom Resource Difinitions
+
+if you add a new API object and controller
+- you can use the exsiting "kube-apiserver" to monitor and contorol the object.
+- "Custom Resource Definition(CRD)" will be added to the cluster API path, currently under "apiextentions.k8s.io/v1beta1"
+
+add a new object to the cluster
+- exsiting API functionarity can be used. 
+- Object must respond to REST request
+- have their configuration state validated and stored in the same manner as built-in objects
+- 
+
+"Custom Resource Definition(CRD)"
+- allows the resouce to be deployed in a namespace, or be available in the entire cluster.
+- the YAML file sets this with the "scope:" parameter, which can be set to "Namespaced" or "Cluster"
+
+Prior to K8s v1.8
+- resouce type called "ThirdPartyResource(TPR)"
+- Deprecated, no longer available.
+- All rerouces need to be rebuilt as "Custom Resource Definition(CRD)".
+
+## Configuration Example
+
+```
+apiVersion: apiextentions.k8s.io/v1beta1
+  # should match the current level of stability
+
+kind: CustomResourceDefinition
+  # CRD: the object type being inserted by the kube-apiserver
+
+metadata:
+  name: backups.stable.linux.com
+    # the name must match the "spec" feild. 
+    # the syntax must be <plural name><group>
+
+spec:
+  group: stable.linux.com
+    # group name wil become part of the REST API
+    # under '/apis/<group>/<version>' or '/apis/ stable/v1'
+  version: v1
+  scope: Namespaced
+    # determin if the object exists in a single namespace or is cluster-wide.
+  names:
+    plural: backups
+      # Defines the last part of the API URL, like a 'apis/stable/v1/backups'
+    singular: backup
+      # represent the name with displayed and make CLI usage easier
+    shortNames:
+    - bks
+      # represent the name with displayed and make CLI usage easier
+
+    kind: Backup
+      # camelcased singuler type used in resource manifests
+```
+
+## New Object Configuration
 
 # Others
 Resource
