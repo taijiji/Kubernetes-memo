@@ -2893,6 +2893,146 @@ spec:
 
 ## New Object Configuration
 
+```
+apiVersion: "stable.linux.com/v1"  # CRD object
+kind: BackUp                       # CRD object
+metadata:
+  name: a-backup-object
+spec: # depend on the controller(Without validation)
+  timeSpec: "* * * * */5"
+  image: linux-backup-image
+  replicas: 5
+```
+
+## Optional Hooks
+Finalaizer: asynchronous pre-delete hook
+1. an API "delete" request is recieved
+2. "metadata.deletionTimestamp" is updated.
+3. The controller then triggers whichever finalizer has been configured.
+4. When the finalizer completes, it is removed from the list.
+5. The controller continues to complete and remove finalizers until the string is empty.
+
+Finalaizer:
+
+```
+metadata:
+  finalizers:
+  - finalizer.stable.linux.com
+```
+
+Validation:
+
+```
+validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            timeSpec: # must be a string matching a particular pattern
+              type: string
+              pattern: '^(\d+|\*)(/\d+)?(\s+(\d+|\*)(/\d+)?){4}$'
+          replicas:
+            type: integer
+            minimum: 1
+            maximum: 10
+```
+
+starting with v1.9 for validation of custom objects via OpenAPI v3 schema.
+
+## Understanding Aggregated API (AA)
+- alloows adding additional Kubernetes-type API servers to the cluster.
+- a subordinate to kube-apiserver
+
+enable AA
+- kube-apiserver to include "--enable-aggregator-routing=true"
+
+## LAB13.1
+https://lms.quickstart.com/custom/858487/LAB_13.1.pdf
+
+
+# Chapter14 Kerbenetes Fededations
+
+## Cluster Federation
+
+Federation: API endpoint, control plane, which accepts API call and passes the calls to member API servers.
+- avoiding Cloud Vendor lockin
+- Regional & Global scaralibility and hiher availability
+
+deploy federated resouces
+- "Federated Services"
+- "Federated Ingress"
+
+## Federation Control Plane
+
+```
+kubectl,etcd
+-> Federation API Server
+-> "federation controller manager"
+-> etcd, API server in each area
+```
+
+Every 40 sec, by default, the nodes "ClusterController" will sync ClusterStates.
+
+## Switching between Clusters
+multiple clister in deffierent zone.
+- Not federation.
+- manually switch endpoint targets for kubectl.
+- none of the scalability or HA features.
+- allow for quickly changing between clusters.
+
+```
+kubectl config use-context sanfrancisco
+kubectl get nodes
+
+kubectl config use-context chicago
+kubectl get nodes
+
+kubectl --context=paris get nodes
+```
+
+each context and authentications keys would be in kubectl configuration file.
+- usually, '$HOME/.kube/config'
+- authentication: SSL/TLS
+
+## Building a Federation with kubefed
+
+kubefed (federation)
+- New feature, starting in v1.6
+- a federation must begin with the context to a host cluster.
+- values in '~/.kube/config'. 
+- 'kubectl config view'
+
+creation of the control plane
+- interacts with cluster, local storage, DNS.
+- 'kubefed init fellowship'
+
+```
+kubefed init fellowship \
+    --host-cluster-context=rivendell \
+    --dns-provider="google-clouddns" \
+    --dns-zone-name="example.com." \
+    --api-server-service-type="NodePort" \
+    --api-server-advertise-address="10.0.10.20"
+```
+
+'kubefed join'
+- add cluster to the federation
+
+```
+kubefed join gonder \
+    --host-cluster-context=rivendell
+    --cluster-context=gonder_needs_no_king
+    --secret-name=11kingdom
+```
+
+## Using Federated Resources
+
+
+
+
+
+
+
 # Others
 Resource
 - https://training.linuxfoundation.org/cm/LFS258/
