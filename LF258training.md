@@ -3027,6 +3027,136 @@ kubefed join gonder \
 
 ## Using Federated Resources
 
+"Federated Ingress"
+- Only run on GCE
+
+10 replicas / 5 clusters
+-> 2 replicas per 1 cluster
+
+## Federation API Resources
+
+Each of the Kubernetes resources may have slight diffrecence used with Federation.
+- cluster, ConfigMap, DaemonSet, Deployment, events, Horizontal Pod Autoscalers, HPA, Ingress, Jobs, Namespaces, ReplicaSets, Secrets
+- use federated server API
+
+namespaces with federation (same as some resources)
+- when created with the federated server, will be created on each cluster.
+- when removed, they are only removed from the federated API server.
+- Each cluster retains the namespace and all objects created within.
+- An administrator would need to change the context to each cluster and delete the namespace manually to fully remove it.
+
+## Balancing ReplicaSets
+
+re-balance the replicas
+- by default, replicas be spread. you can re-balance
+- scheduling mode pods on 1 cluster, and less on another.
+
+
+Adusting weight
+- Kuberntes will re-balance the pods across the federated cluster.
+- you can start with even weights, and then use "kubectl apply" to update the values.
+
+```
+annotations:
+    federation.kubernetes.io/replica-set-prederence: |
+      {
+          "rebalance": true,
+          "clusters": {
+              "new-york": {
+                  "minReplicas": 0,
+                  "maxReplicas": 20,
+                  "weight": 10 # if zero, all the replicas would run on other nodes.
+              },
+              "berlin": {
+                  "minReplicas": 1,
+                  "maxReplicas": 200,
+                  "weight": 20
+              }
+          }
+      }
+```
+
+# HELM
+
+## Deploying Complex Applications
+
+HELM: Package Manager for kubernetes
+- like yum, apt
+- to deploy simple Docker applications
+- Starting with the v1.4
+- Chart: pakage (= deb, rpm). Manifests template.
+- Tiller:  Cluster compornet to deploy. run on each cluster.
+
+you can package all the manifests and make them available as a single tarball.
+  - Manifests for deployments, services, ConfigMaps
+  - you will create some secrets, Ingress, other objects.
+
+## Tiller and Helm Client
+
+Helm Client on local machine
+-> searh from Chart Repositroy
+-> init and install by Tiller server on cluster
+-> create pods,svc, secrets on cluster
+
+## Chart Cntents
+
+chart : archived set of Kubernetes resouce manifests.
+- Chart.yaml : metadata about the Chart (name, version, keyword, ...)
+- README.md
+- templates : resource manefests that make up applicaion. 
+    - NOTES.txt
+    - _helpers.tpl
+    - configmap.yaml
+    - deployment.yaml
+    - pvc.yaml
+    - secrets.yaml
+    - svc.yaml
+- values.yaml: keys and values, used to generate the release in the cluster.
+
+## Templates
+
+templates
+- resource manigests that use the "Go" templating systax.
+- Variables defined in the "values.yaml" file
+
+sample: MariaDB
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+    name: {{ template "fullname" . }}
+    labels:
+        app: {{ template "fullname" . }}
+        chart: {{ .Chart.Name }}--{{ .Chart.Version }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+type: Opaque
+data:
+    mariadb-root-password: {{ default "" .Values.mariadbRootPassword | b64enc | quote }}
+    mariadb-password: {{ default "" .Values.mariadbPassword | b64enc | quote }}
+```
+
+## Initilizing Helm
+
+```
+$ helm init
+
+...
+Tiller (the helm server side component) has been installed into your Kubernetes cluster.
+Happy Helming!
+```
+
+helm initialization should have created a new "tiller-deploy" pod in the cluster.
+
+```
+$ kubectl get deployments --namespace=kube-system
+
+NAMESPACE   NAME            ....
+kube-system tiller-deploy   ....
+```
+
+## Chart Repositories
 
 
 
