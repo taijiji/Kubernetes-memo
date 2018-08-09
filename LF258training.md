@@ -3158,9 +3158,82 @@ kube-system tiller-deploy   ....
 
 ## Chart Repositories
 
+Repositories are simple HTTP server that contain an index file and a tarball
+
+```
+$ hekm repo add testing \
+http://storage.googleapis.com/kubernetes-charts-testing
 
 
+$ helm repo list
 
+NAME    URL
+stable  http://....
+local   http://....
+testing http://....
+```
+
+search keyword
+
+```
+$ helm search redis
+
+NAME                    VERSION     DESCRIPTION
+testing/redis-cluster   0.0.5       ....
+teting/redis-standalone 0.0.1       ....
+```
+
+## Deploying a Chart
+
+'helm install' : to deploy a Chart( = package)
+
+```
+$ helm install testing/redis-standalone
+```
+
+```
+$ helm list
+
+NAME        REVISION    UPDATED     STATUS      CHART
+amber-eel   1           Fri Oct ..  DEPLOYED    redis-standalone-0.0.1
+```
+
+# Chapter 16 Security
+
+## Overview
+
+Authorization
+- like ABAC, RBAC
+- kubeadm
+- "admittion control" system
+
+Network Policies
+- Fkannel or Calico
+
+## Accessing the API
+
+"kube-apiserver" goes through a 3-step process
+1. Authentication (X509 certifacte, a token, LDAP server)
+2. Authorization (ABAC or RBAC: Role-Based Access Control)
+3. Admission control
+
+## Authentication
+
+Authentication 3 main points
+- authenticate with with certificates, tokens or basic authentication(username/password)
+- users are not created bythe API. by an external system
+- used by access the API
+- more advanced authentication mechanisms
+    - "Webhooks" to verify bearer tokens
+    - connection with an external "OpenID" provider
+
+"kube-apiserver" authentification options
+- "--basic-auth-file"
+- "--oidc-issuer-url"
+- "--oken-auth-file"
+- "--authorization-webhook-config-file"
+
+## Authorization
 
 
 # Others
