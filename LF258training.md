@@ -3230,10 +3230,63 @@ Authentication 3 main points
 "kube-apiserver" authentification options
 - "--basic-auth-file"
 - "--oidc-issuer-url"
-- "--oken-auth-file"
+- "--token-auth-file"
 - "--authorization-webhook-config-file"
 
 ## Authorization
+
+main authorization mode. Deny / Allow setting
+- ABAC (Atribute-Based Access Control)
+- RBAC (Role-Based Access Control)
+- WebHook
+
+"kube-apiserver" startup options
+- "--ahthorization-mode=ABAC"
+- "--ahthorization-mode=RBAC"
+- "--ahthorization-mode=Webhook"
+- "--ahthorization-mode=AlwaysDeny"
+- "--ahthorization-mode=AlwaysAllow"
+
+## ABAC
+
+ABAC: Attribute Based Access Control
+- the first authorization mode
+- Today, default is "RBAC"
+
+Policies are define a JSON file.
+"kube-apiserver"
+- "--authorization-policy-file=my_policy.json"
+
+Pplicy file, authorizes user "bob"
+
+```
+{
+    "apiVersion": "abac.authorization.kubernetes.io/v1beta1",
+    "kind": "Policy",
+    "spec": {
+        "user": "bob",
+        "namespace": "foobar",
+        "resource": "pods",
+        "readonly": true
+    }
+}
+```
+
+## RBAC
+
+RBAC: Role Based Access Control
+- writhing rules to allow/deny operations by users, roles or groups
+
+All resources(Pods, Namespaces) belong "API Group".
+- allow operations such as Create, Read, Update, Delete(CRUD)
+- Operations are called "verbs" inside YAML files
+- "Roles" are a group of rule.
+- "ClusterRoles" have a scope of the entire cluster.
+- "User Accounts", "Service Accounts", "Groups"
+    - when using kubectl "clusterrolebinding"
+
+
+
 
 
 # Others
