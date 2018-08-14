@@ -3285,7 +3285,104 @@ All resources(Pods, Namespaces) belong "API Group".
 - "User Accounts", "Service Accounts", "Groups"
     - when using kubectl "clusterrolebinding"
 
+## RBAC Process Overview
 
+RBAC process summary
+1. Determin or create namespace
+2. Create certificate credentials for user
+3. Set the credentials for the user to the namespace using a context
+4. Create a role for the expected task set
+5. Bind the user to the role
+6. Verify the user has limited access
+
+basic flow to create a certificate for a user.
+1. require outside authentication, such as a OpenSSL certificates.
+2. generate the certificate against the cluster ertificate authority.
+3. Using a "context", set that sredential for the user.
+
+Role can then be used to configure
+- "apiGroups"
+- "resources"
+- "verbs"
+- the user can then be bound to a role limiting what and where they can work in the cluster.
+
+
+## Admission Controller
+Admission Control: The last Step in letting an API request into Kubernetes.
+
+"kube-apiserver" uses this set of contollers by default
+- "--admission-control=Initializers, NamespaceLifecycle, LimitRaanger, \"
+  "ServiceAccount, DefaultStorageClass, DefaultTolerationSeconds \"
+  "NodeRestricton, ResourceQuota"
+
+"Initializers"
+- the first controller
+- allow the dynamic modification of the API request
+- providing great flexibility
+
+"ResourceQuota" cotroller
+- the one of admission controller functionality.
+- ensure that the object created does not violate any of exisiting quotas.
+
+## Security Contexts
+"Security context" = The security limitation
+- example
+    - UID of ghe process
+    - Linux capabilities
+    - filesystem group
+
+Enforce a policy that contianers cannot run theier process
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  securityContext:
+    runAsNonRoot: true
+  containers:
+  - image: nginx
+    name: nginx
+
+```
+
+It it not allowed. Hence, the Pod will never run.
+
+```
+$ kubectl get pods
+
+NAME    READY   STATUS
+nginx   0/1     container has runAsNoRoot and image will run as root
+```
+
+## Pod Security Policies
+
+"PodSecurityPolicies(PSP)"
+- To automate the enforcement of "security context"
+- A PSP is defined via k8s manifest following the PSP API schema
+
+PSP example
+- need to configure the admission controller of the "controller-manager" to contain "PodSecurityPolity"
+
+
+```
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: restricted
+spec:
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: MustRunAsNonRoot
+  fsGroup:
+    rule: RunAsAny
+```
+
+## Network Security Policies
 
 
 
