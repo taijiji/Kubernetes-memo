@@ -3384,6 +3384,112 @@ spec:
 
 ## Network Security Policies
 
+"NetworkPolicy"
+- ingree/egress traffic can be allowed / dropped.
+- "spec" : narrow down the effect to a particular namespace
+- "pddSelector" or label : narrow down the Pods
+- ingress/egress setting the traffic to/from IP address/ports.
+
+"NetworkPolicies"
+- network providers support. (Not all providers)
+- 'Calico', 'Romana', 'Cilium', 'kube-router', 'WeaveNet'
+
+## Network Security Policy Example
+
+narrow down the policy to affect the default namespace.
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+   name: ingress-egress-policy
+   namespace: default
+spec:
+  podSelectpr:
+    matchLabels:
+      role: db  # only pods with the labake of "role: db"
+
+  policyTypes:  # affect by this policy, both Ingress and Egress 
+  - Ingress
+  - Egress
+
+  ingress:  # 'ingress' includes a 172.17 network. 
+  - from:
+    - ipBlock:
+      cidr: 172.17.0.0/16
+      except:
+      - 172.17.1.0/24  # 172.17.1.0 IPs beinig excluded from this traffic. 
+  
+    - namepaceSlector:
+        matchLabels:
+            project: myproject
+
+    - podSelector:
+        matchLabels:
+            role: frontend  # need to match label "role: frontend"
+
+    ports:
+    - protocol: TCP
+        port: 6379  # allow TCP traffic on port 6379 from these Pods
+
+  egress:
+  # allow 10.0.0.0/24 range TCP traffic on port 5978 to these Pods
+
+  - to:
+    - ipBlock:
+        cider: 10.0.0.0/24
+
+    ports:
+    - protocol: TCP
+      port: 5978  
+```
+
+empty ingree/egress rule
+- deny all type of traffic for the Pods.
+- Not suggeested.
+
+
+'matchExpressions' statement
+
+```
+podSelector:
+  matchExpressions:
+```
+
+## Default Policy Example
+
+default = empty {}
+- not allow ingress traffic
+- Egress traffic unaffected by this policy
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyType:
+  - Ingress
+```
+
+Some plugin, such as "WeaveNet" 
+- require annotation of the Namespace
+- "DefaultDeny" for the 'myns' namespace:
+
+```
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: myns
+  annotations:
+    net.beta.kubernetes.io/network-policy: |
+    {
+        "ingress": {
+            "isolation": "DefaultDeny"
+        }
+    }
+```
 
 
 # Others
